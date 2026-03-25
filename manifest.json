@@ -1,0 +1,9 @@
+{
+	"id": "newanki",
+	"name": "NewAnki",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Obsidian 间隔重复复习插件，基于 Anki SM-2 算法，支持右键制卡、分屏复习、全局复习 Deck。",
+	"author": "",
+	"isDesktopOnly": false
+}

@@ -1,0 +1,236 @@
+/* ── Review Container ── */
+.newanki-review-container {
+	padding: 20px;
+	max-width: 700px;
+	margin: 0 auto;
+	font-family: var(--font-interface);
+}
+
+/* ── Progress Bar ── */
+.newanki-progress {
+	margin-bottom: 20px;
+}
+
+.newanki-progress-label {
+	text-align: center;
+	font-size: 14px;
+	color: var(--text-muted);
+	margin-bottom: 6px;
+}
+
+.newanki-progress-bar {
+	width: 100%;
+	height: 6px;
+	background: var(--background-modifier-border);
+	border-radius: 3px;
+	overflow: hidden;
+}
+
+.newanki-progress-fill {
+	height: 100%;
+	background: var(--interactive-accent);
+	border-radius: 3px;
+	transition: width 0.3s ease;
+}
+
+/* ── Card ── */
+.newanki-card {
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 12px;
+	padding: 28px;
+	margin-bottom: 24px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.newanki-section-label {
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--text-muted);
+	margin-bottom: 8px;
+}
+
+.newanki-question-text {
+	font-size: 18px;
+	line-height: 1.6;
+	color: var(--text-normal);
+	white-space: pre-wrap;
+}
+
+.newanki-divider {
+	margin: 20px 0;
+}
+
+.newanki-divider hr {
+	border: none;
+	border-top: 1px dashed var(--background-modifier-border);
+}
+
+.newanki-answer-content {
+	font-size: 16px;
+	line-height: 1.6;
+	color: var(--text-normal);
+	white-space: pre-wrap;
+}
+
+.newanki-source-info {
+	margin-top: 16px;
+	padding-top: 12px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.newanki-source-path {
+	font-size: 12px;
+	color: var(--text-faint);
+}
+
+/* ── Show Answer Button ── */
+.newanki-show-answer-wrap {
+	text-align: center;
+}
+
+.newanki-show-answer-btn {
+	width: 100%;
+	max-width: 400px;
+	padding: 12px 24px;
+	font-size: 16px;
+	font-weight: 500;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: opacity 0.15s ease;
+}
+
+.newanki-show-answer-btn:hover {
+	opacity: 0.9;
+}
+
+/* ── Rating Buttons ── */
+.newanki-rating-buttons {
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+}
+
+.newanki-rating-col {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: 1;
+	max-width: 120px;
+}
+
+.newanki-interval-label {
+	font-size: 12px;
+	color: var(--text-muted);
+	margin-bottom: 6px;
+	text-align: center;
+}
+
+.newanki-rating-btn {
+	width: 100%;
+	padding: 10px 8px;
+	font-size: 14px;
+	font-weight: 500;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.newanki-rating-btn:hover {
+	opacity: 0.85;
+	transform: translateY(-1px);
+}
+
+.newanki-rating-btn:active {
+	transform: translateY(0);
+}
+
+.newanki-btn-again {
+	background: #e74c3c;
+	color: #fff;
+}
+
+.newanki-btn-hard {
+	background: #e67e22;
+	color: #fff;
+}
+
+.newanki-btn-good {
+	background: #27ae60;
+	color: #fff;
+}
+
+.newanki-btn-easy {
+	background: #2980b9;
+	color: #fff;
+}
+
+/* ── Empty / Complete States ── */
+.newanki-empty,
+.newanki-complete {
+	text-align: center;
+	padding: 60px 20px;
+}
+
+.newanki-empty-icon,
+.newanki-complete-icon {
+	font-size: 48px;
+	margin-bottom: 16px;
+}
+
+.newanki-empty h3,
+.newanki-complete h3 {
+	margin-bottom: 8px;
+	color: var(--text-normal);
+}
+
+.newanki-empty p,
+.newanki-complete p {
+	color: var(--text-muted);
+}
+
+.newanki-close-btn {
+	margin-top: 20px;
+	padding: 8px 24px;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+/* ── Create Card Modal ── */
+.newanki-answer-preview {
+	margin-bottom: 16px;
+	padding: 12px;
+	background: var(--background-secondary);
+	border-radius: 8px;
+}
+
+.newanki-label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+	margin-bottom: 4px;
+}
+
+.newanki-answer-text {
+	font-size: 14px;
+	color: var(--text-normal);
+	white-space: pre-wrap;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.newanki-modal-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 16px;
+}
