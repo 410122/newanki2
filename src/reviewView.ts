@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, MarkdownView, TFile } from "obsidian";
+import { ItemView, WorkspaceLeaf, MarkdownView, TFile, MarkdownRenderer } from "obsidian";
 import { CardData, Rating, State } from "./models";
 import { CardStore } from "./store";
 import { reviewCard, getNextIntervals } from "./sm2";
@@ -127,19 +127,18 @@ export class ReviewView extends ItemView {
 
 		const questionSection = cardEl.createDiv({ cls: "newanki-question-section" });
 		questionSection.createEl("div", { text: "问题", cls: "newanki-section-label" });
-
-		const questionInput = questionSection.createEl("textarea", {
-			cls: "newanki-question-input",
-		});
-		questionInput.value = card.question;
-		this.autoResizeTextarea(questionInput);
-		questionInput.addEventListener("blur", async () => {
-			const newValue = questionInput.value.trim();
-			if (newValue && newValue !== card.question) {
-				card.question = newValue;
-				await this.store.updateCard(card);
+		this.renderEditableMarkdownSection(
+			questionSection,
+			card.question,
+			card.sourceFile,
+			"newanki-question-input",
+			async (newValue) => {
+				if (newValue && newValue !== card.question) {
+					card.question = newValue;
+					await this.store.updateCard(card);
+				}
 			}
-		});
+		);
 
 		if (this.answerRevealed) {
 			const divider = cardEl.createDiv({ cls: "newanki-divider" });
@@ -147,19 +146,18 @@ export class ReviewView extends ItemView {
 
 			const answerSection = cardEl.createDiv({ cls: "newanki-answer-section" });
 			answerSection.createEl("div", { text: "答案", cls: "newanki-section-label" });
-
-			const answerInput = answerSection.createEl("textarea", {
-				cls: "newanki-answer-input",
-			});
-			answerInput.value = card.answer;
-			this.autoResizeTextarea(answerInput);
-			answerInput.addEventListener("blur", async () => {
-				const newValue = answerInput.value.trim();
-				if (newValue && newValue !== card.answer) {
-					card.answer = newValue;
-					await this.store.updateCard(card);
+			this.renderEditableMarkdownSection(
+				answerSection,
+				card.answer,
+				card.sourceFile,
+				"newanki-answer-input",
+				async (newValue) => {
+					if (newValue && newValue !== card.answer) {
+						card.answer = newValue;
+						await this.store.updateCard(card);
+					}
 				}
-			});
+			);
 		}
 
 		if (this.session?.isGlobal) {
@@ -178,6 +176,61 @@ export class ReviewView extends ItemView {
 		};
 		textarea.addEventListener("input", resize);
 		setTimeout(resize, 0);
+	}
+
+	private renderEditableMarkdownSection(
+		container: HTMLElement,
+		value: string,
+		sourcePath: string,
+		inputClass: string,
+		onBlurSave: (newValue: string) => Promise<void>
+	): void {
+		const input = container.createEl("textarea", { cls: inputClass });
+		input.value = value;
+		this.autoResizeTextarea(input);
+
+		const preview = container.createDiv({
+			cls: "newanki-markdown-preview markdown-rendered",
+		});
+
+		let rendering = false;
+		let renderQueued = false;
+		const renderPreview = async () => {
+			if (rendering) {
+				renderQueued = true;
+				return;
+			}
+			rendering = true;
+			try {
+				do {
+					renderQueued = false;
+					const markdown = input.value.trim();
+					preview.empty();
+					if (markdown) {
+						await MarkdownRenderer.render(this.app, markdown, preview, sourcePath, this);
+					}
+				} while (renderQueued);
+			} catch (error) {
+				preview.empty();
+				preview.createEl("div", {
+					cls: "newanki-preview-error",
+					text: "Markdown 预览渲染失败",
+				});
+				console.error("NewAnki preview render failed:", error);
+			} finally {
+				rendering = false;
+			}
+		};
+
+		input.addEventListener("input", () => {
+			void renderPreview();
+		});
+		input.addEventListener("blur", async () => {
+			await onBlurSave(input.value.trim());
+			void renderPreview();
+		});
+
+		void renderPreview();
 	}
 
 	private renderShowAnswerButton(container: HTMLElement): void {

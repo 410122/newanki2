@@ -118,6 +118,33 @@
 	line-height: 1.6;
 }
 
+.newanki-markdown-preview {
+	margin-top: 10px;
+	padding: 10px 12px;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+}
+
+.newanki-markdown-preview p:first-child {
+	margin-top: 0;
+}
+
+.newanki-markdown-preview p:last-child {
+	margin-bottom: 0;
+}
+
+.newanki-markdown-preview img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 6px;
+}
+
+.newanki-preview-error {
+	color: var(--text-error);
+	font-size: 13px;
+}
+
 .newanki-divider {
 	margin: 20px 0;
 }
