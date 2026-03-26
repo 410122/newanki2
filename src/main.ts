@@ -7,6 +7,8 @@ import { NewAnkiSettingTab } from "./settings";
 
 export default class NewAnkiPlugin extends Plugin {
 	store: CardStore;
+	private globalReviewRibbonEl: HTMLElement | null = null;
+	private globalReviewBadgeEl: HTMLElement | null = null;
 
 	async onload(): Promise<void> {
 		this.store = new CardStore(this);
@@ -20,9 +22,10 @@ export default class NewAnkiPlugin extends Plugin {
 		this.registerFileEvents();
 		this.registerReviewAction();
 
-		this.addRibbonIcon("layers", "NewAnki 全局复习", () => {
+		this.globalReviewRibbonEl = this.addRibbonIcon("layers", "NewAnki 全局复习", () => {
 			this.startGlobalReview();
 		});
+		this.globalReviewRibbonEl.addClass("newanki-global-review-ribbon");
 		this.addRibbonIcon("list", "NewAnki 全局卡片预览器", () => {
 			this.openGlobalCardPreview();
 		});
@@ -31,6 +34,13 @@ export default class NewAnkiPlugin extends Plugin {
 
 		this.statusBarEl = this.addStatusBarItem();
 		this.updateStatusBar();
+		this.updateGlobalReviewRibbonBadge();
+		this.registerInterval(
+			window.setInterval(() => {
+				this.updateStatusBar();
+				this.updateGlobalReviewRibbonBadge();
+			}, 30000)
+		);
 	}
 
 	onunload(): void {
@@ -41,6 +51,7 @@ export default class NewAnkiPlugin extends Plugin {
 	private handleCardsChanged(): void {
 		this.updateStatusBar();
 		this.updateReviewAction();
+		this.updateGlobalReviewRibbonBadge();
 	}
 
 	private registerEditorContextMenu(): void {
@@ -345,5 +356,23 @@ export default class NewAnkiPlugin extends Plugin {
 				this.statusBarEl.setText("");
 			}
 		}
+	}
+
+	private updateGlobalReviewRibbonBadge(): void {
+		if (!this.globalReviewRibbonEl) return;
+
+		if (this.globalReviewBadgeEl) {
+			this.globalReviewBadgeEl.remove();
+			this.globalReviewBadgeEl = null;
+		}
+
+		const totalDue = this.store.getTotalDueCount();
+		if (totalDue <= 0) return;
+
+		this.globalReviewBadgeEl = this.globalReviewRibbonEl.createEl("span", {
+			text: totalDue >= 100 ? "99+" : String(totalDue),
+			cls: "newanki-badge newanki-ribbon-badge",
+		});
+		this.globalReviewBadgeEl.setAttr("aria-label", `全局待复习 ${totalDue} 张`);
 	}
 }

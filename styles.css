@@ -1,9 +1,11 @@
 /* ── Review Action Badge ── */
-.view-action.newanki-review-action {
+.view-action.newanki-review-action,
+.newanki-global-review-ribbon {
 	position: relative;
 }
 
-.newanki-review-action .newanki-badge {
+.newanki-review-action .newanki-badge,
+.newanki-global-review-ribbon .newanki-ribbon-badge {
 	position: absolute;
 	top: -4px;
 	right: -4px;
