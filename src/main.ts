@@ -1,6 +1,7 @@
 import { Editor, MarkdownView, Notice, Plugin, TFile, TAbstractFile, WorkspaceLeaf } from "obsidian";
 import { CardStore } from "./store";
 import { CreateCardModal } from "./createCardModal";
+import { CardPreviewModal } from "./cardPreviewModal";
 import { ReviewView, REVIEW_VIEW_TYPE } from "./reviewView";
 import { NewAnkiSettingTab } from "./settings";
 
@@ -22,6 +23,9 @@ export default class NewAnkiPlugin extends Plugin {
 		this.addRibbonIcon("layers", "NewAnki 全局复习", () => {
 			this.startGlobalReview();
 		});
+		this.addRibbonIcon("list", "NewAnki 全局卡片预览器", () => {
+			this.openGlobalCardPreview();
+		});
 
 		this.addSettingTab(new NewAnkiSettingTab(this.app, this));
 
@@ -32,6 +36,11 @@ export default class NewAnkiPlugin extends Plugin {
 	onunload(): void {
 		this.app.workspace.detachLeavesOfType(REVIEW_VIEW_TYPE);
 		this.clearReviewAction();
+	}
+
+	private handleCardsChanged(): void {
+		this.updateStatusBar();
+		this.updateReviewAction();
 	}
 
 	private registerEditorContextMenu(): void {
@@ -59,8 +68,7 @@ export default class NewAnkiPlugin extends Plugin {
 							async (card) => {
 								await this.store.addCard(card);
 								new Notice("卡片已创建！");
-								this.updateStatusBar();
-								this.updateReviewAction();
+								this.handleCardsChanged();
 							}
 						).open();
 					});
@@ -77,6 +85,14 @@ export default class NewAnkiPlugin extends Plugin {
 				const cardCount = this.store.getCardCount(file.path);
 				const dueCount = this.store.getDueCardCount(file.path);
 
+				menu.addItem((item) => {
+					item.setTitle(`卡片预览 (${cardCount})`)
+						.setIcon("list")
+						.onClick(() => {
+							this.openLocalCardPreview(file.path);
+						});
+				});
+
 				if (cardCount > 0) {
 					menu.addItem((item) => {
 						item.setTitle(`复习卡片 (${dueCount}/${cardCount} 到期)`)
@@ -88,6 +104,23 @@ export default class NewAnkiPlugin extends Plugin {
 				}
 			})
 		);
+	}
+
+	private openGlobalCardPreview(): void {
+		new CardPreviewModal(this.app, {
+			store: this.store,
+			scope: "global",
+			onDataChanged: () => this.handleCardsChanged(),
+		}).open();
+	}
+
+	private openLocalCardPreview(filePath: string): void {
+		new CardPreviewModal(this.app, {
+			store: this.store,
+			scope: "local",
+			filePath,
+			onDataChanged: () => this.handleCardsChanged(),
+		}).open();
 	}
 
 	private registerCommands(): void {
@@ -115,8 +148,7 @@ export default class NewAnkiPlugin extends Plugin {
 				async (card) => {
 					await this.store.addCard(card);
 					new Notice("卡片已创建！");
-					this.updateStatusBar();
-					this.updateReviewAction();
+					this.handleCardsChanged();
 				}
 			).open();
 			},
@@ -149,6 +181,7 @@ export default class NewAnkiPlugin extends Plugin {
 	}
 
 	private reviewActionEl: HTMLElement | null = null;
+	private localPreviewActionEl: HTMLElement | null = null;
 
 	private registerReviewAction(): void {
 		this.registerEvent(
@@ -174,6 +207,18 @@ export default class NewAnkiPlugin extends Plugin {
 
 		const dueCount = this.store.getDueCardCount(view.file.path);
 		const cardCount = this.store.getCardCount(view.file.path);
+
+		this.localPreviewActionEl = view.addAction(
+			"list",
+			`局部卡片预览 (${cardCount})`,
+			() => {
+				if (view.file) {
+					this.openLocalCardPreview(view.file.path);
+				}
+			}
+		);
+		this.localPreviewActionEl.addClass("newanki-local-preview-action");
+
 		if (cardCount <= 0) return;
 
 		this.reviewActionEl = view.addAction("layers", `复习卡片 (${dueCount}/${cardCount} 到期)`, () => {
@@ -197,10 +242,19 @@ export default class NewAnkiPlugin extends Plugin {
 			this.reviewActionEl.remove();
 			this.reviewActionEl = null;
 		}
+		if (this.localPreviewActionEl) {
+			this.localPreviewActionEl.remove();
+			this.localPreviewActionEl = null;
+		}
 
 		document
 			.querySelectorAll<HTMLElement>(
-				".view-action.newanki-review-action, .view-action[aria-label^='复习卡片 (']"
+				[
+					".view-action.newanki-review-action",
+					".view-action.newanki-local-preview-action",
+					".view-action[aria-label^='复习卡片 (']",
+					".view-action[aria-label^='局部卡片预览 (']",
+				].join(", ")
 			)
 			.forEach((el) => el.remove());
 	}
@@ -210,6 +264,7 @@ export default class NewAnkiPlugin extends Plugin {
 			this.app.vault.on("rename", (file: TAbstractFile, oldPath: string) => {
 				if (file instanceof TFile && file.extension === "md") {
 					this.store.handleFileRename(oldPath, file.path);
+					this.handleCardsChanged();
 				}
 			})
 		);
@@ -218,6 +273,7 @@ export default class NewAnkiPlugin extends Plugin {
 			this.app.vault.on("delete", (file: TAbstractFile) => {
 				if (file instanceof TFile && file.extension === "md") {
 					this.store.handleFileDelete(file.path);
+					this.handleCardsChanged();
 				}
 			})
 		);

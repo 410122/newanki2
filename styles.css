@@ -315,6 +315,137 @@
 	cursor: pointer;
 }
 
+/* ── Card Preview Modal ── */
+.newanki-card-preview-modal .modal {
+	width: min(980px, 92vw);
+}
+
+.newanki-card-preview-header {
+	margin-bottom: 10px;
+}
+
+.newanki-card-preview-header h3 {
+	margin: 0 0 4px;
+}
+
+.newanki-card-preview-subtitle {
+	font-size: 13px;
+	color: var(--text-muted);
+}
+
+.newanki-card-preview-toolbar {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 12px;
+}
+
+.newanki-card-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	max-height: 62vh;
+	overflow-y: auto;
+	padding-right: 2px;
+}
+
+.newanki-card-empty {
+	color: var(--text-muted);
+	padding: 24px 0;
+	text-align: center;
+}
+
+.newanki-create-card-form,
+.newanki-card-item {
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 10px;
+	padding: 12px;
+}
+
+.newanki-form-title {
+	font-size: 14px;
+	font-weight: 600;
+	margin-bottom: 8px;
+}
+
+.newanki-form-label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+	margin: 8px 0 4px;
+}
+
+.newanki-form-input,
+.newanki-form-select {
+	width: 100%;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	padding: 8px;
+	font-family: var(--font-interface);
+}
+
+.newanki-form-input {
+	resize: vertical;
+	min-height: 74px;
+}
+
+.newanki-form-readonly {
+	padding: 8px;
+	border-radius: 8px;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	font-size: 13px;
+	word-break: break-all;
+}
+
+.newanki-form-actions,
+.newanki-card-item-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 10px;
+}
+
+.newanki-card-item-meta {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 12px;
+	color: var(--text-muted);
+	margin-bottom: 6px;
+}
+
+.newanki-card-source {
+	font-weight: 600;
+	word-break: break-all;
+}
+
+.newanki-card-due {
+	white-space: nowrap;
+}
+
+.newanki-card-item-preview {
+	margin-top: 10px;
+	padding: 10px;
+	border-radius: 8px;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+}
+
+.newanki-preview-block-title {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--text-muted);
+	margin: 6px 0;
+}
+
+.newanki-preview-empty {
+	color: var(--text-faint);
+	font-size: 13px;
+}
+
 /* ── Create Card Modal ── */
 .newanki-answer-preview {
 	margin-bottom: 16px;

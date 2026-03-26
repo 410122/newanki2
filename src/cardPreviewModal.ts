@@ -1,0 +1,374 @@
+import { App, Component, MarkdownRenderer, Modal, Notice } from "obsidian";
+import { CardData, State } from "./models";
+import { CardStore } from "./store";
+
+type PreviewScope = "global" | "local";
+
+interface CardPreviewModalOptions {
+	store: CardStore;
+	scope: PreviewScope;
+	filePath?: string;
+	onDataChanged?: () => void;
+}
+
+export class CardPreviewModal extends Modal {
+	private store: CardStore;
+	private previewScope: PreviewScope;
+	private filePath: string | null;
+	private onDataChanged?: () => void;
+	private markdownComponent = new Component();
+
+	private showCreateForm = false;
+	private createQuestion = "";
+	private createAnswer = "";
+	private createSourcePath = "";
+
+	constructor(app: App, options: CardPreviewModalOptions) {
+		super(app);
+		this.store = options.store;
+		this.previewScope = options.scope;
+		this.filePath = options.filePath ?? null;
+		this.onDataChanged = options.onDataChanged;
+	}
+
+	onOpen(): void {
+		this.markdownComponent.load();
+		this.modalEl.addClass("newanki-card-preview-modal");
+		this.render();
+	}
+
+	onClose(): void {
+		this.markdownComponent.unload();
+		this.contentEl.empty();
+	}
+
+	private render(): void {
+		const { contentEl } = this;
+		contentEl.empty();
+
+		const cards = this.getCards();
+
+		const header = contentEl.createDiv({ cls: "newanki-card-preview-header" });
+		header.createEl("h3", { text: this.getTitle() });
+		header.createEl("div", {
+			cls: "newanki-card-preview-subtitle",
+			text: `共 ${cards.length} 张卡片`,
+		});
+
+		const toolbar = contentEl.createDiv({ cls: "newanki-card-preview-toolbar" });
+		const addBtn = toolbar.createEl("button", {
+			text: this.showCreateForm ? "收起添加" : "添加卡片",
+			cls: "mod-cta",
+		});
+		addBtn.addEventListener("click", () => {
+			this.showCreateForm = !this.showCreateForm;
+			this.render();
+		});
+
+		if (this.showCreateForm) {
+			this.renderCreateForm(contentEl);
+		}
+
+		const list = contentEl.createDiv({ cls: "newanki-card-list" });
+		if (cards.length === 0) {
+			list.createEl("div", {
+				cls: "newanki-card-empty",
+				text: "暂无卡片，点击上方“添加卡片”创建。",
+			});
+			return;
+		}
+
+		for (const card of cards) {
+			this.renderCardItem(list, card);
+		}
+	}
+
+	private renderCreateForm(container: HTMLElement): void {
+		const form = container.createDiv({ cls: "newanki-create-card-form" });
+		form.createEl("div", {
+			cls: "newanki-form-title",
+			text: "新建卡片",
+		});
+
+		form.createEl("div", { cls: "newanki-form-label", text: "问题" });
+		const questionInput = form.createEl("textarea", {
+			cls: "newanki-form-input",
+			attr: { placeholder: "请输入问题..." },
+		});
+		questionInput.value = this.createQuestion;
+		this.autoResizeTextarea(questionInput);
+		questionInput.addEventListener("input", () => {
+			this.createQuestion = questionInput.value;
+		});
+
+		form.createEl("div", { cls: "newanki-form-label", text: "答案（支持 Markdown）" });
+		const answerInput = form.createEl("textarea", {
+			cls: "newanki-form-input",
+			attr: { placeholder: "请输入答案..." },
+		});
+		answerInput.value = this.createAnswer;
+		this.autoResizeTextarea(answerInput);
+		answerInput.addEventListener("input", () => {
+			this.createAnswer = answerInput.value;
+		});
+
+		let sourcePath = this.resolveCreateSourcePath();
+		if (this.previewScope === "global") {
+			form.createEl("div", { cls: "newanki-form-label", text: "来源文件" });
+			const select = form.createEl("select", {
+				cls: "newanki-form-select",
+			});
+			const paths = this.getAllMarkdownPaths();
+			for (const path of paths) {
+				select.createEl("option", { text: path, value: path });
+			}
+			if (paths.length > 0) {
+				if (!this.createSourcePath) {
+					this.createSourcePath = paths[0]!;
+				}
+				select.value = this.createSourcePath;
+				sourcePath = this.createSourcePath;
+			}
+			select.addEventListener("change", () => {
+				this.createSourcePath = select.value;
+			});
+		} else if (sourcePath) {
+			form.createEl("div", { cls: "newanki-form-label", text: "来源文件" });
+			form.createEl("div", {
+				cls: "newanki-form-readonly",
+				text: sourcePath,
+			});
+		}
+
+		const actions = form.createDiv({ cls: "newanki-form-actions" });
+		const confirmBtn = actions.createEl("button", { text: "创建", cls: "mod-cta" });
+		confirmBtn.addEventListener("click", async () => {
+			const question = this.createQuestion.trim();
+			const answer = this.createAnswer.trim();
+			sourcePath = this.resolveCreateSourcePath();
+
+			if (!question || !answer) {
+				new Notice("问题和答案不能为空");
+				return;
+			}
+			if (!sourcePath) {
+				new Notice("请选择来源文件");
+				return;
+			}
+
+			const card: CardData = {
+				cardId: this.generateId(),
+				question,
+				answer,
+				sourceFile: sourcePath,
+				lineStart: 0,
+				lineEnd: 0,
+				state: State.Learning,
+				step: 0,
+				ease: null,
+				due: new Date().toISOString(),
+				currentInterval: null,
+				createdAt: new Date().toISOString(),
+			};
+
+			await this.store.addCard(card);
+			this.notifyDataChanged();
+			new Notice("卡片已创建");
+
+			this.createQuestion = "";
+			this.createAnswer = "";
+			this.showCreateForm = false;
+			this.render();
+		});
+
+		const cancelBtn = actions.createEl("button", { text: "取消" });
+		cancelBtn.addEventListener("click", () => {
+			this.showCreateForm = false;
+			this.render();
+		});
+	}
+
+	private renderCardItem(container: HTMLElement, card: CardData): void {
+		const item = container.createDiv({ cls: "newanki-card-item" });
+
+		const meta = item.createDiv({ cls: "newanki-card-item-meta" });
+		meta.createEl("div", {
+			cls: "newanki-card-source",
+			text: card.sourceFile,
+		});
+		meta.createEl("div", {
+			cls: "newanki-card-due",
+			text: `到期: ${this.formatDateTime(card.due)}`,
+		});
+
+		item.createEl("div", { cls: "newanki-form-label", text: "问题" });
+		const questionInput = item.createEl("textarea", {
+			cls: "newanki-form-input",
+		});
+		questionInput.value = card.question;
+		this.autoResizeTextarea(questionInput);
+
+		item.createEl("div", { cls: "newanki-form-label", text: "答案" });
+		const answerInput = item.createEl("textarea", {
+			cls: "newanki-form-input",
+		});
+		answerInput.value = card.answer;
+		this.autoResizeTextarea(answerInput);
+
+		let previewVisible = false;
+		const previewWrap = item.createDiv({
+			cls: "newanki-card-item-preview",
+		});
+		previewWrap.style.display = "none";
+
+		const renderPreview = async () => {
+			previewWrap.empty();
+			const questionTitle = previewWrap.createDiv({ cls: "newanki-preview-block-title" });
+			questionTitle.setText("问题预览");
+			const questionPreview = previewWrap.createDiv({ cls: "markdown-rendered" });
+			await this.renderMarkdown(questionInput.value.trim(), questionPreview, card.sourceFile);
+
+			const answerTitle = previewWrap.createDiv({ cls: "newanki-preview-block-title" });
+			answerTitle.setText("答案预览");
+			const answerPreview = previewWrap.createDiv({ cls: "markdown-rendered" });
+			await this.renderMarkdown(answerInput.value.trim(), answerPreview, card.sourceFile);
+		};
+
+		questionInput.addEventListener("input", () => {
+			this.autoResizeTextarea(questionInput);
+			if (previewVisible) {
+				void renderPreview();
+			}
+		});
+		answerInput.addEventListener("input", () => {
+			this.autoResizeTextarea(answerInput);
+			if (previewVisible) {
+				void renderPreview();
+			}
+		});
+
+		const actions = item.createDiv({ cls: "newanki-card-item-actions" });
+		const previewBtn = actions.createEl("button", { text: "预览" });
+		previewBtn.addEventListener("click", () => {
+			previewVisible = !previewVisible;
+			previewWrap.style.display = previewVisible ? "" : "none";
+			previewBtn.setText(previewVisible ? "隐藏预览" : "预览");
+			if (previewVisible) {
+				void renderPreview();
+			}
+		});
+
+		const saveBtn = actions.createEl("button", { text: "保存", cls: "mod-cta" });
+		saveBtn.addEventListener("click", async () => {
+			const question = questionInput.value.trim();
+			const answer = answerInput.value.trim();
+			if (!question || !answer) {
+				new Notice("问题和答案不能为空");
+				return;
+			}
+
+			const updated: CardData = {
+				...card,
+				question,
+				answer,
+			};
+			await this.store.updateCard(updated);
+			card.question = question;
+			card.answer = answer;
+
+			this.notifyDataChanged();
+			new Notice("卡片已保存");
+
+			if (previewVisible) {
+				void renderPreview();
+			}
+		});
+
+		const deleteBtn = actions.createEl("button", {
+			text: "删除",
+			cls: "mod-warning",
+		});
+		deleteBtn.addEventListener("click", async () => {
+			if (!confirm("确认删除这张卡片吗？")) return;
+			await this.store.deleteCard(card.cardId, card.sourceFile);
+			this.notifyDataChanged();
+			new Notice("卡片已删除");
+			this.render();
+		});
+	}
+
+	private getCards(): CardData[] {
+		const cards =
+			this.previewScope === "global"
+				? this.store.getAllCards()
+				: this.store.getCardsForFile(this.filePath ?? "");
+
+		return [...cards].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+	}
+
+	private getTitle(): string {
+		if (this.previewScope === "global") {
+			return "全局卡片预览器";
+		}
+		return `局部卡片预览器 - ${this.filePath ?? "当前文件"}`;
+	}
+
+	private resolveCreateSourcePath(): string {
+		if (this.previewScope === "local") {
+			return this.filePath ?? "";
+		}
+		return this.createSourcePath;
+	}
+
+	private getAllMarkdownPaths(): string[] {
+		return this.app.vault
+			.getMarkdownFiles()
+			.map((f) => f.path)
+			.sort((a, b) => a.localeCompare(b, "zh-CN"));
+	}
+
+	private autoResizeTextarea(textarea: HTMLTextAreaElement): void {
+		textarea.style.height = "auto";
+		textarea.style.height = `${textarea.scrollHeight}px`;
+	}
+
+	private async renderMarkdown(markdown: string, container: HTMLElement, sourcePath: string): Promise<void> {
+		if (!markdown) {
+			container.createEl("div", {
+				cls: "newanki-preview-empty",
+				text: "（空）",
+			});
+			return;
+		}
+		try {
+			await MarkdownRenderer.render(
+				this.app,
+				markdown,
+				container,
+				sourcePath,
+				this.markdownComponent
+			);
+		} catch (error) {
+			container.empty();
+			container.createEl("div", {
+				cls: "newanki-preview-error",
+				text: "Markdown 渲染失败",
+			});
+			console.error("NewAnki card preview render failed:", error);
+		}
+	}
+
+	private formatDateTime(iso: string): string {
+		const date = new Date(iso);
+		if (Number.isNaN(date.getTime())) return iso;
+		return date.toLocaleString();
+	}
+
+	private notifyDataChanged(): void {
+		this.onDataChanged?.();
+	}
+
+	private generateId(): string {
+		return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+	}
+}
