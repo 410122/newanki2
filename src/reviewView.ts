@@ -127,7 +127,19 @@ export class ReviewView extends ItemView {
 
 		const questionSection = cardEl.createDiv({ cls: "newanki-question-section" });
 		questionSection.createEl("div", { text: "问题", cls: "newanki-section-label" });
-		questionSection.createEl("div", { text: card.question, cls: "newanki-question-text" });
+
+		const questionInput = questionSection.createEl("textarea", {
+			cls: "newanki-question-input",
+		});
+		questionInput.value = card.question;
+		this.autoResizeTextarea(questionInput);
+		questionInput.addEventListener("blur", async () => {
+			const newValue = questionInput.value.trim();
+			if (newValue && newValue !== card.question) {
+				card.question = newValue;
+				await this.store.updateCard(card);
+			}
+		});
 
 		if (this.answerRevealed) {
 			const divider = cardEl.createDiv({ cls: "newanki-divider" });
@@ -135,7 +147,19 @@ export class ReviewView extends ItemView {
 
 			const answerSection = cardEl.createDiv({ cls: "newanki-answer-section" });
 			answerSection.createEl("div", { text: "答案", cls: "newanki-section-label" });
-			answerSection.createEl("div", { text: card.answer, cls: "newanki-answer-content" });
+
+			const answerInput = answerSection.createEl("textarea", {
+				cls: "newanki-answer-input",
+			});
+			answerInput.value = card.answer;
+			this.autoResizeTextarea(answerInput);
+			answerInput.addEventListener("blur", async () => {
+				const newValue = answerInput.value.trim();
+				if (newValue && newValue !== card.answer) {
+					card.answer = newValue;
+					await this.store.updateCard(card);
+				}
+			});
 		}
 
 		if (this.session?.isGlobal) {
@@ -145,6 +169,15 @@ export class ReviewView extends ItemView {
 				cls: "newanki-source-path",
 			});
 		}
+	}
+
+	private autoResizeTextarea(textarea: HTMLTextAreaElement): void {
+		const resize = () => {
+			textarea.style.height = "auto";
+			textarea.style.height = textarea.scrollHeight + "px";
+		};
+		textarea.addEventListener("input", resize);
+		setTimeout(resize, 0);
 	}
 
 	private renderShowAnswerButton(container: HTMLElement): void {

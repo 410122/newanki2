@@ -59,6 +59,42 @@
 	white-space: pre-wrap;
 }
 
+.newanki-question-input,
+.newanki-answer-input {
+	width: 100%;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	color: var(--text-normal);
+	font-family: var(--font-interface);
+	padding: 6px 8px;
+	resize: none;
+	overflow: hidden;
+	outline: none;
+	transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.newanki-question-input:hover,
+.newanki-answer-input:hover {
+	border-color: var(--background-modifier-border);
+}
+
+.newanki-question-input:focus,
+.newanki-answer-input:focus {
+	border-color: var(--interactive-accent);
+	background: var(--background-secondary);
+}
+
+.newanki-question-input {
+	font-size: 18px;
+	line-height: 1.6;
+}
+
+.newanki-answer-input {
+	font-size: 16px;
+	line-height: 1.6;
+}
+
 .newanki-divider {
 	margin: 20px 0;
 }
