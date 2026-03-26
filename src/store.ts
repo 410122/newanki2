@@ -95,22 +95,56 @@ export class CardStore {
 		await this.save();
 	}
 
-	handleFileRename(oldPath: string, newPath: string): void {
-		if (this.data.cards[oldPath]) {
-			this.data.cards[newPath] = this.data.cards[oldPath].map((c) => ({
+	async handleFileRename(oldPath: string, newPath: string): Promise<boolean> {
+		let changed = false;
+		const entries = Object.entries(this.data.cards);
+		const oldPrefix = `${oldPath}/`;
+		const newPrefix = `${newPath}/`;
+
+		for (const [path, cards] of entries) {
+			const isExact = path === oldPath;
+			const isChild = path.startsWith(oldPrefix);
+			if (!isExact && !isChild) continue;
+
+			const targetPath = isExact ? newPath : path.replace(oldPrefix, newPrefix);
+			const migrated = cards.map((c) => ({
 				...c,
-				sourceFile: newPath,
+				sourceFile: targetPath,
 			}));
-			delete this.data.cards[oldPath];
-			this.save();
+
+			if (this.data.cards[targetPath]) {
+				this.data.cards[targetPath] = [
+					...this.data.cards[targetPath],
+					...migrated,
+				];
+			} else {
+				this.data.cards[targetPath] = migrated;
+			}
+			delete this.data.cards[path];
+			changed = true;
 		}
+
+		if (changed) {
+			await this.save();
+		}
+		return changed;
 	}
 
-	handleFileDelete(filePath: string): void {
-		if (this.data.cards[filePath]) {
-			delete this.data.cards[filePath];
-			this.save();
+	async handleFileDelete(filePath: string): Promise<boolean> {
+		let changed = false;
+		const prefix = `${filePath}/`;
+
+		for (const path of Object.keys(this.data.cards)) {
+			if (path === filePath || path.startsWith(prefix)) {
+				delete this.data.cards[path];
+				changed = true;
+			}
 		}
+
+		if (changed) {
+			await this.save();
+		}
+		return changed;
 	}
 
 	getCardCount(filePath: string): number {

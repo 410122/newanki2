@@ -16,13 +16,15 @@ interface ReviewSession {
 
 export class ReviewView extends ItemView {
 	private store: CardStore;
+	private onCardsChanged?: () => void;
 	private session: ReviewSession | null = null;
 	private answerRevealed = false;
 	private sourceLeaf: WorkspaceLeaf | null = null;
 
-	constructor(leaf: WorkspaceLeaf, store: CardStore) {
+	constructor(leaf: WorkspaceLeaf, store: CardStore, onCardsChanged?: () => void) {
 		super(leaf);
 		this.store = store;
+		this.onCardsChanged = onCardsChanged;
 	}
 
 	getViewType(): string {
@@ -167,6 +169,15 @@ export class ReviewView extends ItemView {
 				cls: "newanki-source-path",
 			});
 		}
+
+		const actions = cardEl.createDiv({ cls: "newanki-card-actions" });
+		const deleteBtn = actions.createEl("button", {
+			text: "删除当前卡片",
+			cls: "newanki-delete-card-btn",
+		});
+		deleteBtn.addEventListener("click", async () => {
+			await this.handleDeleteCurrentCard(card);
+		});
 	}
 
 	private autoResizeTextarea(textarea: HTMLTextAreaElement): void {
@@ -337,6 +348,7 @@ export class ReviewView extends ItemView {
 	private async handleRating(card: CardData, rating: Rating): Promise<void> {
 		const result = reviewCard(card, rating, this.store.settings);
 		await this.store.updateCard(result.card);
+		this.onCardsChanged?.();
 
 		if (this.session) {
 			const updatedCard = result.card;
@@ -354,6 +366,28 @@ export class ReviewView extends ItemView {
 			this.render();
 			this.scrollToCardSource();
 		}
+	}
+
+	private async handleDeleteCurrentCard(card: CardData): Promise<void> {
+		if (!this.session) return;
+		if (!confirm("确认删除当前正在复习的卡片吗？")) return;
+
+		await this.store.deleteCard(card.cardId, card.sourceFile);
+		this.onCardsChanged?.();
+
+		const before = this.session.cards.slice(0, this.session.currentIndex);
+		const after = this.session.cards
+			.slice(this.session.currentIndex)
+			.filter((c) => c.cardId !== card.cardId);
+		const nextCards = [...before, ...after];
+		const removedCount = this.session.cards.length - nextCards.length;
+
+		this.session.cards = nextCards;
+		this.session.total = Math.max(0, this.session.total - removedCount);
+		this.answerRevealed = false;
+
+		this.render();
+		void this.scrollToCardSource();
 	}
 
 	private async scrollToCardSource(): Promise<void> {

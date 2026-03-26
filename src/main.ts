@@ -14,7 +14,10 @@ export default class NewAnkiPlugin extends Plugin {
 		this.store = new CardStore(this);
 		await this.store.load();
 
-		this.registerView(REVIEW_VIEW_TYPE, (leaf) => new ReviewView(leaf, this.store));
+		this.registerView(
+			REVIEW_VIEW_TYPE,
+			(leaf) => new ReviewView(leaf, this.store, () => this.handleCardsChanged())
+		);
 
 		this.registerEditorContextMenu();
 		this.registerFileMenu();
@@ -272,18 +275,20 @@ export default class NewAnkiPlugin extends Plugin {
 
 	private registerFileEvents(): void {
 		this.registerEvent(
-			this.app.vault.on("rename", (file: TAbstractFile, oldPath: string) => {
-				if (file instanceof TFile && file.extension === "md") {
-					this.store.handleFileRename(oldPath, file.path);
+			this.app.vault.on("rename", async (file: TAbstractFile, oldPath: string) => {
+				if (file instanceof TFile && file.extension !== "md") return;
+				const changed = await this.store.handleFileRename(oldPath, file.path);
+				if (changed) {
 					this.handleCardsChanged();
 				}
 			})
 		);
 
 		this.registerEvent(
-			this.app.vault.on("delete", (file: TAbstractFile) => {
-				if (file instanceof TFile && file.extension === "md") {
-					this.store.handleFileDelete(file.path);
+			this.app.vault.on("delete", async (file: TAbstractFile) => {
+				if (file instanceof TFile && file.extension !== "md") return;
+				const changed = await this.store.handleFileDelete(file.path);
+				if (changed) {
 					this.handleCardsChanged();
 				}
 			})

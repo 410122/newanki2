@@ -198,6 +198,27 @@
 	color: var(--text-faint);
 }
 
+.newanki-card-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 12px;
+}
+
+.newanki-delete-card-btn {
+	padding: 6px 12px;
+	border: 1px solid #e74c3c;
+	background: transparent;
+	color: #e74c3c;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 13px;
+}
+
+.newanki-delete-card-btn:hover {
+	background: #e74c3c;
+	color: #fff;
+}
+
 /* ── Show Answer Button ── */
 .newanki-show-answer-wrap {
 	text-align: center;
