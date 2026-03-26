@@ -185,17 +185,21 @@ export class ReviewView extends ItemView {
 		inputClass: string,
 		onBlurSave: (newValue: string) => Promise<void>
 	): void {
-		const input = container.createEl("textarea", { cls: inputClass });
-		input.value = value;
-		this.autoResizeTextarea(input);
-
-		const preview = container.createDiv({
-			cls: "newanki-markdown-preview markdown-rendered",
+		const wrap = container.createDiv({ cls: "newanki-inline-markdown" });
+		const preview = wrap.createDiv({
+			cls: "newanki-markdown-preview newanki-editable-preview markdown-rendered",
 		});
+		const input = wrap.createEl("textarea", {
+			cls: `${inputClass} newanki-inline-editor`,
+		});
+		input.style.display = "none";
 
+		let committedValue = value.trim();
+		let isEditing = false;
 		let rendering = false;
 		let renderQueued = false;
-		const renderPreview = async () => {
+
+		const renderPreview = async (markdown: string) => {
 			if (rendering) {
 				renderQueued = true;
 				return;
@@ -204,10 +208,16 @@ export class ReviewView extends ItemView {
 			try {
 				do {
 					renderQueued = false;
-					const markdown = input.value.trim();
 					preview.empty();
 					if (markdown) {
+						preview.removeClass("is-empty");
 						await MarkdownRenderer.render(this.app, markdown, preview, sourcePath, this);
+					} else {
+						preview.addClass("is-empty");
+						preview.createEl("span", {
+							cls: "newanki-inline-placeholder",
+							text: "点击这里编辑内容",
+						});
 					}
 				} while (renderQueued);
 			} catch (error) {
@@ -222,15 +232,58 @@ export class ReviewView extends ItemView {
 			}
 		};
 
-		input.addEventListener("input", () => {
-			void renderPreview();
-		});
-		input.addEventListener("blur", async () => {
-			await onBlurSave(input.value.trim());
-			void renderPreview();
+		const enterEditMode = () => {
+			if (isEditing) return;
+			isEditing = true;
+			input.value = committedValue;
+			input.style.display = "";
+			preview.style.display = "none";
+			this.autoResizeTextarea(input);
+			input.focus();
+			const end = input.value.length;
+			input.setSelectionRange(end, end);
+		};
+
+		const exitEditMode = async (save: boolean) => {
+			if (!isEditing) return;
+			isEditing = false;
+
+			if (save) {
+				const nextValue = input.value.trim();
+				if (nextValue !== committedValue) {
+					await onBlurSave(nextValue);
+					committedValue = nextValue;
+				}
+			} else {
+				input.value = committedValue;
+			}
+
+			input.style.display = "none";
+			preview.style.display = "";
+			await renderPreview(committedValue);
+		};
+
+		preview.addEventListener("click", () => {
+			enterEditMode();
 		});
 
-		void renderPreview();
+		input.addEventListener("blur", () => {
+			void exitEditMode(true);
+		});
+
+		input.addEventListener("keydown", (evt) => {
+			if (evt.key === "Escape") {
+				evt.preventDefault();
+				void exitEditMode(false);
+				return;
+			}
+			if (evt.key === "Enter" && (evt.ctrlKey || evt.metaKey)) {
+				evt.preventDefault();
+				void exitEditMode(true);
+			}
+		});
+
+		void renderPreview(committedValue);
 	}
 
 	private renderShowAnswerButton(container: HTMLElement): void {
