@@ -354,6 +354,62 @@
 	text-align: center;
 }
 
+.newanki-global-preview-layout {
+	display: grid;
+	grid-template-columns: minmax(220px, 280px) 1fr;
+	gap: 12px;
+	align-items: start;
+}
+
+.newanki-global-file-sidebar {
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 10px;
+	padding: 10px;
+	max-height: 62vh;
+	overflow: hidden;
+}
+
+.newanki-global-file-title {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--text-muted);
+	margin-bottom: 8px;
+}
+
+.newanki-global-file-list {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	max-height: calc(62vh - 28px);
+	overflow-y: auto;
+}
+
+.newanki-global-file-item {
+	width: 100%;
+	text-align: left;
+	padding: 8px 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 13px;
+	cursor: pointer;
+}
+
+.newanki-global-file-item:hover {
+	border-color: var(--interactive-accent);
+}
+
+.newanki-global-file-item.is-active {
+	background: var(--background-modifier-hover);
+	border-color: var(--interactive-accent);
+}
+
+.newanki-global-card-content {
+	min-width: 0;
+}
+
 .newanki-create-card-form,
 .newanki-card-item {
 	background: var(--background-secondary);

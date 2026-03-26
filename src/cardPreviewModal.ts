@@ -22,6 +22,7 @@ export class CardPreviewModal extends Modal {
 	private createQuestion = "";
 	private createAnswer = "";
 	private createSourcePath = "";
+	private selectedGlobalFile: string | null = null;
 
 	constructor(app: App, options: CardPreviewModalOptions) {
 		super(app);
@@ -46,13 +47,18 @@ export class CardPreviewModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
+		const totalCards = this.store.getAllCards().length;
 		const cards = this.getCards();
+		const subtitle =
+			this.previewScope === "global"
+				? `当前文件 ${cards.length} 张 / 全部 ${totalCards} 张`
+				: `共 ${cards.length} 张卡片`;
 
 		const header = contentEl.createDiv({ cls: "newanki-card-preview-header" });
 		header.createEl("h3", { text: this.getTitle() });
 		header.createEl("div", {
 			cls: "newanki-card-preview-subtitle",
-			text: `共 ${cards.length} 张卡片`,
+			text: subtitle,
 		});
 
 		const toolbar = contentEl.createDiv({ cls: "newanki-card-preview-toolbar" });
@@ -69,11 +75,66 @@ export class CardPreviewModal extends Modal {
 			this.renderCreateForm(contentEl);
 		}
 
-		const list = contentEl.createDiv({ cls: "newanki-card-list" });
+		if (this.previewScope === "global") {
+			this.renderGlobalLayout(contentEl, cards);
+			return;
+		}
+		this.renderCardList(contentEl, cards);
+	}
+
+	private renderGlobalLayout(container: HTMLElement, cards: CardData[]): void {
+		const layout = container.createDiv({ cls: "newanki-global-preview-layout" });
+		const sidebar = layout.createDiv({ cls: "newanki-global-file-sidebar" });
+		const content = layout.createDiv({ cls: "newanki-global-card-content" });
+
+		const filePaths = this.getGlobalFilePaths();
+		this.ensureGlobalSelection(filePaths);
+
+		sidebar.createEl("div", {
+			cls: "newanki-global-file-title",
+			text: "Markdown 文件",
+		});
+
+		const fileList = sidebar.createDiv({ cls: "newanki-global-file-list" });
+		if (filePaths.length === 0) {
+			fileList.createEl("div", {
+				cls: "newanki-card-empty",
+				text: "暂无 Markdown 文件",
+			});
+			content.createEl("div", {
+				cls: "newanki-card-empty",
+				text: "暂无卡片，点击上方“添加卡片”创建。",
+			});
+			return;
+		}
+
+		for (const path of filePaths) {
+			const cardCount = this.store.getCardCount(path);
+			const item = fileList.createEl("button", {
+				cls: "newanki-global-file-item",
+				text: `${path} (${cardCount})`,
+			});
+			if (path === this.selectedGlobalFile) {
+				item.addClass("is-active");
+			}
+			item.addEventListener("click", () => {
+				this.selectedGlobalFile = path;
+				this.render();
+			});
+		}
+
+		this.renderCardList(content, cards);
+	}
+
+	private renderCardList(container: HTMLElement, cards: CardData[]): void {
+		const list = container.createDiv({ cls: "newanki-card-list" });
 		if (cards.length === 0) {
 			list.createEl("div", {
 				cls: "newanki-card-empty",
-				text: "暂无卡片，点击上方“添加卡片”创建。",
+				text:
+					this.previewScope === "global"
+						? "当前文件暂无卡片。"
+						: "暂无卡片，点击上方“添加卡片”创建。",
 			});
 			return;
 		}
@@ -124,7 +185,7 @@ export class CardPreviewModal extends Modal {
 			}
 			if (paths.length > 0) {
 				if (!this.createSourcePath) {
-					this.createSourcePath = paths[0]!;
+					this.createSourcePath = this.selectedGlobalFile ?? paths[0]!;
 				}
 				select.value = this.createSourcePath;
 				sourcePath = this.createSourcePath;
@@ -172,6 +233,9 @@ export class CardPreviewModal extends Modal {
 			};
 
 			await this.store.addCard(card);
+			if (this.previewScope === "global") {
+				this.selectedGlobalFile = card.sourceFile;
+			}
 			this.notifyDataChanged();
 			new Notice("卡片已创建");
 
@@ -298,10 +362,16 @@ export class CardPreviewModal extends Modal {
 	}
 
 	private getCards(): CardData[] {
-		const cards =
-			this.previewScope === "global"
-				? this.store.getAllCards()
-				: this.store.getCardsForFile(this.filePath ?? "");
+		let cards: CardData[] = [];
+		if (this.previewScope === "global") {
+			const filePaths = this.getGlobalFilePaths();
+			this.ensureGlobalSelection(filePaths);
+			cards = this.selectedGlobalFile
+				? this.store.getCardsForFile(this.selectedGlobalFile)
+				: [];
+		} else {
+			cards = this.store.getCardsForFile(this.filePath ?? "");
+		}
 
 		return [...cards].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 	}
@@ -318,6 +388,20 @@ export class CardPreviewModal extends Modal {
 			return this.filePath ?? "";
 		}
 		return this.createSourcePath;
+	}
+
+	private getGlobalFilePaths(): string[] {
+		return this.app.vault
+			.getMarkdownFiles()
+			.map((f) => f.path)
+			.sort((a, b) => a.localeCompare(b, "zh-CN"));
+	}
+
+	private ensureGlobalSelection(filePaths: string[]): void {
+		if (this.previewScope !== "global") return;
+		if (!this.selectedGlobalFile || !filePaths.includes(this.selectedGlobalFile)) {
+			this.selectedGlobalFile = filePaths[0] ?? null;
+		}
 	}
 
 	private getAllMarkdownPaths(): string[] {
