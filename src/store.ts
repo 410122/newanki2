@@ -1,5 +1,5 @@
 import { Plugin } from "obsidian";
-import { CardData, PluginData, PluginSettings, DEFAULT_PLUGIN_DATA } from "./models";
+import { CardData, PluginData, PluginSettings, DEFAULT_PLUGIN_DATA, State } from "./models";
 
 export class CardStore {
 	private plugin: Plugin;
@@ -93,6 +93,23 @@ export class CardStore {
 			delete this.data.cards[filePath];
 		}
 		await this.save();
+	}
+
+	async resetReviewProgressForFile(filePath: string): Promise<number> {
+		const cards = this.data.cards[filePath];
+		if (!cards || cards.length === 0) return 0;
+
+		const now = new Date().toISOString();
+		this.data.cards[filePath] = cards.map((card) => ({
+			...card,
+			state: State.Learning,
+			step: 0,
+			ease: null,
+			due: now,
+			currentInterval: null,
+		}));
+		await this.save();
+		return cards.length;
 	}
 
 	async handleFileRename(oldPath: string, newPath: string): Promise<boolean> {

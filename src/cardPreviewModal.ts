@@ -62,6 +62,33 @@ export class CardPreviewModal extends Modal {
 		});
 
 		const toolbar = contentEl.createDiv({ cls: "newanki-card-preview-toolbar" });
+		if (this.previewScope === "local") {
+			const resetBtn = toolbar.createEl("button", {
+				text: "重置复习进度",
+				cls: "mod-warning",
+			});
+			resetBtn.addEventListener("click", async () => {
+				const filePath = this.filePath ?? "";
+				if (!filePath) {
+					new Notice("当前文件路径无效");
+					return;
+				}
+				if (!confirm(`确认重置「${filePath}」下所有卡片的复习进度吗？`)) {
+					return;
+				}
+
+				const count = await this.store.resetReviewProgressForFile(filePath);
+				if (count <= 0) {
+					new Notice("当前文件没有可重置的卡片");
+					return;
+				}
+
+				this.notifyDataChanged();
+				new Notice(`已重置 ${count} 张卡片的复习进度`);
+				this.render();
+			});
+		}
+
 		const addBtn = toolbar.createEl("button", {
 			text: this.showCreateForm ? "收起添加" : "添加卡片",
 			cls: "mod-cta",
