@@ -17,6 +17,7 @@ export default class NewAnkiPlugin extends Plugin {
 		this.registerFileMenu();
 		this.registerCommands();
 		this.registerFileEvents();
+		this.registerReviewAction();
 
 		this.addRibbonIcon("layers", "NewAnki 全局复习", () => {
 			this.startGlobalReview();
@@ -30,6 +31,7 @@ export default class NewAnkiPlugin extends Plugin {
 
 	onunload(): void {
 		this.app.workspace.detachLeavesOfType(REVIEW_VIEW_TYPE);
+		this.clearReviewAction();
 	}
 
 	private registerEditorContextMenu(): void {
@@ -54,16 +56,17 @@ export default class NewAnkiPlugin extends Plugin {
 								file.path,
 								cursor.line,
 								cursorTo.line,
-								async (card) => {
-									await this.store.addCard(card);
-									new Notice("卡片已创建！");
-									this.updateStatusBar();
-								}
-							).open();
-						});
-				});
-			})
-		);
+							async (card) => {
+								await this.store.addCard(card);
+								new Notice("卡片已创建！");
+								this.updateStatusBar();
+								this.updateReviewAction();
+							}
+						).open();
+					});
+			});
+		})
+	);
 	}
 
 	private registerFileMenu(): void {
@@ -109,12 +112,13 @@ export default class NewAnkiPlugin extends Plugin {
 					file.path,
 					cursor.line,
 					cursorTo.line,
-					async (card) => {
-						await this.store.addCard(card);
-						new Notice("卡片已创建！");
-						this.updateStatusBar();
-					}
-				).open();
+				async (card) => {
+					await this.store.addCard(card);
+					new Notice("卡片已创建！");
+					this.updateStatusBar();
+					this.updateReviewAction();
+				}
+			).open();
 			},
 		});
 
@@ -142,6 +146,63 @@ export default class NewAnkiPlugin extends Plugin {
 				this.startGlobalReview();
 			},
 		});
+	}
+
+	private reviewActionEl: HTMLElement | null = null;
+
+	private registerReviewAction(): void {
+		this.registerEvent(
+			this.app.workspace.on("active-leaf-change", () => {
+				this.updateReviewAction();
+			})
+		);
+		this.registerEvent(
+			this.app.workspace.on("file-open", () => {
+				this.updateReviewAction();
+			})
+		);
+		this.app.workspace.onLayoutReady(() => {
+			this.updateReviewAction();
+		});
+	}
+
+	private updateReviewAction(): void {
+		this.clearReviewAction();
+
+		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (!view?.file) return;
+
+		const dueCount = this.store.getDueCardCount(view.file.path);
+		const cardCount = this.store.getCardCount(view.file.path);
+		if (cardCount <= 0) return;
+
+		this.reviewActionEl = view.addAction("layers", `复习卡片 (${dueCount}/${cardCount} 到期)`, () => {
+			if (view.file) {
+				this.startFileReview(view.file.path);
+			}
+		});
+		this.reviewActionEl.addClass("newanki-review-action");
+
+		if (dueCount > 0) {
+			const badge = this.reviewActionEl.createEl("span", {
+				text: dueCount >= 100 ? "99+" : String(dueCount),
+				cls: "newanki-badge",
+			});
+			badge.setAttr("aria-label", `待复习 ${dueCount} 张`);
+		}
+	}
+
+	private clearReviewAction(): void {
+		if (this.reviewActionEl) {
+			this.reviewActionEl.remove();
+			this.reviewActionEl = null;
+		}
+
+		document
+			.querySelectorAll<HTMLElement>(
+				".view-action.newanki-review-action, .view-action[aria-label^='复习卡片 (']"
+			)
+			.forEach((el) => el.remove());
 	}
 
 	private registerFileEvents(): void {
