@@ -1,5 +1,5 @@
 import { ItemView, WorkspaceLeaf, MarkdownView, TFile } from "obsidian";
-import { CardData, Rating } from "./models";
+import { CardData, Rating, State } from "./models";
 import { CardStore } from "./store";
 import { reviewCard, getNextIntervals } from "./sm2";
 
@@ -108,16 +108,17 @@ export class ReviewView extends ItemView {
 
 	private renderProgress(container: HTMLElement): void {
 		const session = this.session!;
+		const remaining = session.cards.length - session.currentIndex;
 		const progressWrap = container.createDiv({ cls: "newanki-progress" });
 
 		const label = progressWrap.createDiv({ cls: "newanki-progress-label" });
 		label.setText(
-			`${session.reviewed + 1} / ${session.total}`
+			`已完成 ${session.reviewed} / ${session.total}，剩余 ${remaining}`
 		);
 
 		const barOuter = progressWrap.createDiv({ cls: "newanki-progress-bar" });
 		const barInner = barOuter.createDiv({ cls: "newanki-progress-fill" });
-		const pct = ((session.reviewed) / session.total) * 100;
+		const pct = (session.reviewed / session.total) * 100;
 		barInner.style.width = `${pct}%`;
 	}
 
@@ -199,7 +200,15 @@ export class ReviewView extends ItemView {
 		await this.store.updateCard(result.card);
 
 		if (this.session) {
-			this.session.reviewed++;
+			const updatedCard = result.card;
+			const graduated = updatedCard.state === State.Review;
+
+			if (graduated) {
+				this.session.reviewed++;
+			} else {
+				this.session.cards.push(updatedCard);
+			}
+
 			this.session.currentIndex++;
 			this.answerRevealed = false;
 
