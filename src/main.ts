@@ -57,6 +57,7 @@ export default class NewAnkiPlugin extends Plugin {
 		this.updateGlobalReviewRibbonBadge();
 	}
 
+	//建卡入口
 	private registerEditorContextMenu(): void {
 		this.registerEvent(
 			this.app.workspace.on("editor-menu", (menu, editor, view) => {
@@ -91,6 +92,7 @@ export default class NewAnkiPlugin extends Plugin {
 	);
 	}
 
+	//复习入口
 	private registerFileMenu(): void {
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file) => {
