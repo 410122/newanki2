@@ -17,7 +17,7 @@ from typing import Any
 import math
 import random
 
-
+# 每个卡片对象的学习状态enum  card.state
 class State(IntEnum):
     """
     Enum representing the learning state of a Card object.
@@ -27,7 +27,7 @@ class State(IntEnum):
     Review = 2
     Relearning = 3
 
-
+# 每个卡片对象的评分enum
 class Rating(IntEnum):
     """
     Enum representing the four possible Anki ratings when reviewing a card.
@@ -38,7 +38,7 @@ class Rating(IntEnum):
     Good = 3  # correct - took some amount of mental effort to recall
     Easy = 4  # correct - recalled effortlessly
 
-
+# 每个卡片对象
 class Card:
     """
     Represents a flashcard in the Anki system.
@@ -54,7 +54,7 @@ class Card:
     """
 
     card_id: int
-    state: State
+    state: State  # 卡片的当前学习状态
     step: int | None
     ease: float | None
     due: datetime
@@ -173,7 +173,7 @@ class ReviewLog:
             review_duration=review_duration,
         )
 
-
+# Anki SM-2 scheduler 算法调度系统
 class Scheduler:
     """
     The Anki SM-2 scheduler.

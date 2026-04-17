@@ -40,8 +40,8 @@ export class CardStore {
 	}
 
 	getDueCardsForFile(filePath: string): CardData[] {
-		const now = new Date().toISOString();
-		return this.getCardsForFile(filePath).filter((c) => c.due <= now);
+		const now = new Date();
+		return this.getCardsForFile(filePath).filter((c) => this.isCardDue(c, now));
 	}
 
 	getAllCards(): CardData[] {
@@ -53,8 +53,27 @@ export class CardStore {
 	}
 
 	getAllDueCards(): CardData[] {
-		const now = new Date().toISOString();
-		return this.getAllCards().filter((c) => c.due <= now);
+		const now = new Date();
+		return this.getAllCards().filter((c) => this.isCardDue(c, now));
+	}
+
+	private isCardDue(card: CardData, now: Date): boolean {
+		const dueMs = Date.parse(card.due);
+		if (Number.isNaN(dueMs)) {
+			return false;
+		}
+
+		// Review cards are day-based in UX: once the due date arrives, show it all day.
+		if (card.state === State.Review) {
+			return this.getLocalDayStartMs(new Date(dueMs)) <= this.getLocalDayStartMs(now);
+		}
+
+		// Learning/Relearning cards remain time-based.
+		return dueMs <= now.getTime();
+	}
+
+	private getLocalDayStartMs(date: Date): number {
+		return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 	}
 
 	getFilesWithCards(): string[] {
