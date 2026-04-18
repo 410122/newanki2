@@ -73,7 +73,7 @@ export class CardStore {
 			return this.getLocalDayStartMs(new Date(dueMs)) <= this.getLocalDayStartMs(now);
 		}
 
-		// Learning/Relearning cards remain time-based.
+		// New/Learning/Relearning cards remain time-based.
 		return dueMs <= now.getTime();
 	}
 
@@ -129,8 +129,8 @@ export class CardStore {
 		const now = new Date().toISOString();
 		this.data.cards[filePath] = cards.map((card) => ({
 			...card,
-			state: State.Learning,
-			step: 0,
+			state: State.New,
+			step: null,
 			ease: null,
 			due: now,
 			currentInterval: null,

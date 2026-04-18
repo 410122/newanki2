@@ -1,4 +1,4 @@
-本文档详细解析NewAnki插件中SM-2间隔重复算法的完整实现。SM-2算法是SuperMemo记忆系统的核心算法，通过科学地安排复习间隔来优化记忆效果。本实现支持三种卡片状态（学习、复习、重新学习）和四种评分等级（重来、困难、良好、简单）。
+本文档详细解析NewAnki插件中SM-2间隔重复算法的完整实现。SM-2算法是SuperMemo记忆系统的核心算法，通过科学地安排复习间隔来优化记忆效果。本实现支持四种卡片状态（新建、学习、复习、重新学习）和四种评分等级（重来、困难、良好、简单）。
 
 ## 算法核心架构
 
@@ -6,9 +6,14 @@ SM-2算法在NewAnki中的实现采用状态机模式，根据卡片当前状态
 
 ```mermaid
 flowchart TD
-    A[卡片状态] --> B{学习状态 Learning}
+    A[卡片状态] --> N{新建状态 New}
+    A --> B{学习状态 Learning}
     A --> C{复习状态 Review}
     A --> D{重新学习状态 Relearning}
+    
+    N --> N1[首次评分处理]
+    N1 --> N2{Easy/Good直接毕业 或 进入Learning}
+    N2 --> G
     
     B --> E[评分处理]
     E --> F{再次学习/毕业}
@@ -28,11 +33,12 @@ Sources: [sm2.ts](src/sm2.ts#L69-L241)
 ## 核心数据结构
 
 ### 卡片状态与评分枚举
-算法定义了三种卡片状态和四种评分等级，构成状态转换的基础：
+算法定义了四种卡片状态和四种评分等级，构成状态转换的基础：
 
 | 状态类型 | 枚举值 | 描述 |
 |---------|--------|------|
-| Learning | 1 | 新卡片学习阶段 |
+| New | 0 | 新建卡片，尚未开始学习 |
+| Learning | 1 | 学习阶段，正在执行学习步骤 |
 | Review | 2 | 正常复习阶段 |
 | Relearning | 3 | 遗忘后重新学习 |
 
@@ -62,9 +68,62 @@ interface CardData {
 
 Sources: [models.ts](src/models.ts#L14-L27)
 
+## 新建状态处理逻辑 (State.New)
+
+新建状态是卡片创建后的初始状态。当用户首次对 New 卡片进行评分时，根据评分和学习步骤配置决定卡片的去向：
+
+### 状态转换规则
+
+| 评分 | 行为 | 目标状态 |
+|------|------|---------|
+| **Easy** | 直接毕业，设置 easyInterval 间隔 | Review |
+| **Good**（学习步骤仅1步） | 直接毕业，设置 graduatingInterval 间隔 | Review |
+| **Good**（学习步骤≥2步） | 进入第2步学习 | Learning (step=1) |
+| **Hard / Again** | 进入第1步学习 | Learning (step=0) |
+| （无学习步骤时） | 任何评分均直接毕业 | Review |
+
+### 核心实现
+
+```typescript
+if (updated.state === State.New) {
+    const ls = settings.learningSteps;
+
+    if (rating === Rating.Easy) {
+        // 直接毕业到 Review，使用 easyInterval
+        updated.state = State.Review;
+        updated.ease = settings.startingEase;
+        updated.currentInterval = settings.easyInterval;
+        updated.due = addDays(now, updated.currentInterval);
+    } else if (ls.length === 0) {
+        // 无学习步骤，直接毕业
+        updated.state = State.Review;
+        updated.currentInterval = settings.graduatingInterval;
+        updated.due = addDays(now, updated.currentInterval);
+    } else if (rating === Rating.Good) {
+        if (ls.length === 1) {
+            // 仅一步，直接毕业
+            updated.state = State.Review;
+            updated.currentInterval = settings.graduatingInterval;
+        } else {
+            // 跳过第一步，从第二步开始学习
+            updated.state = State.Learning;
+            updated.step = 1;
+            updated.due = addMinutes(now, ls[1]!);
+        }
+    } else {
+        // Again / Hard：从第一步开始学习
+        updated.state = State.Learning;
+        updated.step = 0;
+        updated.due = addMinutes(now, ls[0]!);
+    }
+}
+```
+
+Sources: [sm2.ts](src/sm2.ts#L79-L114)
+
 ## 学习状态处理逻辑
 
-学习阶段针对新卡片，采用渐进式时间间隔：
+学习阶段针对已进入学习步骤的卡片（从 New 状态转入），采用渐进式时间间隔：
 
 ### 学习步骤配置
 ```typescript
@@ -167,7 +226,7 @@ Sources: [models.ts](src/models.ts#L52-L64)
 
 NewAnki的SM-2实现具有以下技术特点：
 
-1. **完整的状态机支持**：覆盖学习、复习、重新学习全流程
+1. **完整的状态机支持**：覆盖新建、学习、复习、重新学习全流程（四状态）
 2. **科学的间隔计算**：基于易度因子的指数增长模型
 3. **延迟复习补偿**：智能处理逾期复习情况
 4. **间隔模糊化**：防止模式化记忆，增强记忆效果

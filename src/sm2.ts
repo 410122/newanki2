@@ -76,7 +76,43 @@ export function reviewCard(
 	const updated = deepCopyCard(card);
 	const now = reviewDatetime ?? new Date().toISOString();
 
-	if (updated.state === State.Learning) {
+	if (updated.state === State.New) {
+		const ls = settings.learningSteps;
+
+		if (rating === Rating.Easy) {
+			updated.state = State.Review;
+			updated.step = null;
+			updated.ease = settings.startingEase;
+			updated.currentInterval = settings.easyInterval;
+			updated.due = addDays(now, updated.currentInterval);
+		} else if (ls.length === 0) {
+			updated.state = State.Review;
+			updated.step = null;
+			updated.ease = settings.startingEase;
+			updated.currentInterval = settings.graduatingInterval;
+			updated.due = addDays(now, updated.currentInterval);
+		} else if (rating === Rating.Good) {
+			if (ls.length === 1) {
+				updated.state = State.Review;
+				updated.step = null;
+				updated.ease = settings.startingEase;
+				updated.currentInterval = settings.graduatingInterval;
+				updated.due = addDays(now, updated.currentInterval);
+			} else {
+				updated.state = State.Learning;
+				updated.step = 1;
+				updated.ease = null;
+				updated.currentInterval = null;
+				updated.due = addMinutes(now, ls[1]!);
+			}
+		} else {
+			updated.state = State.Learning;
+			updated.step = 0;
+			updated.ease = null;
+			updated.currentInterval = null;
+			updated.due = addMinutes(now, ls[0]!);
+		}
+	} else if (updated.state === State.Learning) {
 		const step = updated.step ?? 0;
 		const ls = settings.learningSteps;
 

@@ -77,7 +77,7 @@ const card: CardData = {
     question,          // 问题文本
     answer,            // 答案文本（支持 Markdown）
     sourceFile,        // 来源文件路径
-    state: State.Learning, // 学习状态
+    state: State.New, // 新建状态（首次评分后进入学习或复习）
     due: new Date().toISOString(), // 到期时间
     createdAt: new Date().toISOString(), // 创建时间
 };

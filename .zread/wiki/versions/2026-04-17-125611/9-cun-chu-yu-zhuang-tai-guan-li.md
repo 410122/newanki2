@@ -5,13 +5,15 @@ NewAnki 插件的存储与状态管理系统负责管理用户创建的卡片数
 NewAnki 采用类型化的数据模型来管理卡片状态和插件配置，确保数据的完整性和一致性。
 
 ### 卡片状态枚举
-系统定义了三种卡片状态来跟踪学习进度：
-- **Learning** (学习阶段)：新卡片的学习阶段
+系统定义了四种卡片状态来跟踪学习进度：
+- **New** (新建阶段)：刚创建的卡片，尚未开始任何学习
+- **Learning** (学习阶段)：正在执行学习步骤的卡片
 - **Review** (复习阶段)：已毕业卡片的定期复习
 - **Relearning** (重学阶段)：遗忘卡片的重新学习
 
 ```typescript
 export enum State {
+    New = 0,
     Learning = 1,
     Review = 2,
     Relearning = 3,
@@ -303,8 +305,8 @@ async resetReviewProgressForFile(filePath: string): Promise<number> {
     const now = new Date().toISOString();
     this.data.cards[filePath] = cards.map((card) => ({
         ...card,
-        state: State.Learning,
-        step: 0,
+        state: State.New,
+        step: null,
         ease: null,
         due: now,
         currentInterval: null,

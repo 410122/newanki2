@@ -46,7 +46,7 @@ Sources: [src/main.ts](src/main.ts#L1-L30)
 | CardData | cardId, question, answer, sourceFile | 存储卡片的基本内容和元数据 |
 | ReviewLogData | cardId, rating, reviewDatetime | 记录每次复习的评分和时间 |
 | PluginSettings | learningSteps, intervals, ease | 配置算法的各项参数 |
-| State枚举 | Learning, Review, Relearning | 定义卡片的不同学习状态 |
+| State枚举 | New, Learning, Review, Relearning | 定义卡片的不同学习状态 |
 | Rating枚举 | Again, Hard, Good, Easy | 定义复习时的评分选项 |
 
 这些数据模型为整个复习系统提供了类型安全的基础，确保数据的一致性和可维护性。
@@ -78,7 +78,7 @@ NewAnki 插件提供了一系列实用功能，满足不同场景下的复习需
 
 ### 核心复习功能
 - **间隔重复算法**: 基于 SM-2 的科学记忆算法
-- **多状态管理**: 支持学习、复习、重新学习三种状态
+- **多状态管理**: 支持新建、学习、复习、重新学习四种状态
 - **进度跟踪**: 详细的复习记录和统计信息
 
 ### 用户界面集成

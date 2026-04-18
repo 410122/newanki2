@@ -69,6 +69,17 @@ async onload(): Promise<void> {
     this.registerCommands();
     this.registerFileEvents();
 }
+
+// 新建卡片初始状态为 New
+const card: CardData = {
+    cardId: generateId(),
+    state: State.New,  // 卡片从 New 状态开始
+    step: null,
+    ease: null,
+    due: new Date().toISOString(),
+    currentInterval: null,
+    // ...
+};
 ```
 
 Sources: [main.ts](src/main.ts#L13-L47)
@@ -95,10 +106,11 @@ interface PluginData {
 **到期判断算法：**
 ```typescript
 private isCardDue(card: CardData, now: Date): boolean {
-    // 复习卡片按天计算，学习卡片按时间计算
+    // Review 卡片按天粒度判断（当日即到期）
     if (card.state === State.Review) {
         return this.getLocalDayStartMs(new Date(dueMs)) <= this.getLocalDayStartMs(now);
     }
+    // New/Learning/Relearning 卡片按精确时间判断
     return dueMs <= now.getTime();
 }
 ```
@@ -120,6 +132,21 @@ stateDiagram-v2
     评分处理 --> 问题展示: 下一张卡片
     评分处理 --> 复习完成: 所有卡片完成
     复习完成 --> 空闲状态: 会话结束
+```
+
+**卡片状态机：**
+
+卡片生命周期包含四种状态，新建卡片从 `New` 状态开始：
+
+```mermaid
+stateDiagram-v2
+    [*] --> New: 创建卡片
+    New --> Learning: Again/Hard/Good（进入学习步骤）
+    New --> Review: Easy（直接毕业）/ Good（仅1步时直接毕业）
+    Learning --> Review: Good（完成所有步骤）/ Easy（直接毕业）
+    Review --> Review: Hard/Good/Easy
+    Review --> Relearning: Again（遗忘）
+    Relearning --> Review: Good（完成重学步骤）/ Easy
 ```
 
 **交互设计特点：**

@@ -1,8 +1,8 @@
-本文档详细分析 NewAnki 插件的核心数据模型架构，涵盖卡片状态管理、复习算法数据结构、存储机制以及数据流处理。通过系统性的代码分析，揭示插件如何实现基于 SM-2 算法的间隔重复系统。
+本文档详细分析 NewAnki 插件的核心数据模型架构，涵盖卡片状态管理（含 New 新建状态）、复习算法数据结构、存储机制以及数据流处理。通过系统性的代码分析，揭示插件如何实现基于 SM-2 算法的间隔重复系统。
 
 ## 数据模型架构概览
 
-NewAnki 插件采用分层数据架构，将核心业务逻辑与存储机制分离。数据模型主要分为三个层次：**基础枚举类型**定义状态机、**核心数据结构**承载业务逻辑、**存储管理层**处理持久化操作。这种设计确保了数据的一致性和可维护性。
+NewAnki 插件采用分层数据架构，将核心业务逻辑与存储机制分离。数据模型主要分为三个层次：**基础枚举类型**定义状态机（包含 New、Learning、Review、Relearning 四种状态）、**核心数据结构**承载业务逻辑、**存储管理层**处理持久化操作。这种设计确保了数据的一致性和可维护性。
 
 ```mermaid
 graph TB
@@ -36,16 +36,18 @@ Sources: [models.ts](src/models.ts#L1-L74)
 
 ### 卡片状态枚举 (State)
 
-插件定义了三种核心卡片状态，形成完整的学习周期状态机：
+插件定义了四种核心卡片状态，形成完整的学习周期状态机：
 
 | 状态 | 值 | 描述 |
 |------|----|------|
-| Learning | 1 | 学习阶段，卡片处于初始学习状态 |
+| New | 0 | 新建阶段，卡片刚创建尚未开始学习 |
+| Learning | 1 | 学习阶段，卡片正在进行初始学习步骤 |
 | Review | 2 | 复习阶段，卡片已进入间隔重复周期 |
 | Relearning | 3 | 重新学习阶段，复习失败后返回学习状态 |
 
 ```typescript
 export enum State {
+    New = 0,
     Learning = 1,
     Review = 2,
     Relearning = 3,
@@ -215,7 +217,7 @@ export interface PluginData {
 |---------|------|------|
 | 文件重命名 | `handleFileRename()` | 自动更新卡片源文件路径 |
 | 文件删除 | `handleFileDelete()` | 清理关联卡片数据 |
-| 进度重置 | `resetReviewProgressForFile()` | 文件级学习进度重置 |
+| 进度重置 | `resetReviewProgressForFile()` | 文件级学习进度重置（将所有卡片重置为 New 状态） |
 
 ```typescript
 async handleFileRename(oldPath: string, newPath: string): Promise<boolean> {
@@ -287,7 +289,10 @@ function reviewCard(
     const now = reviewDatetime ?? new Date().toISOString();
     
     // 根据当前状态和评分进行状态转换
-    if (updated.state === State.Learning) {
+    if (updated.state === State.New) {
+        // 新建卡片：首次评分，决定进入 Learning 还是直接毕业到 Review
+        handleNewState(updated, rating, settings, now);
+    } else if (updated.state === State.Learning) {
         // 学习阶段状态转换逻辑
         handleLearningState(updated, rating, settings, now);
     } else if (updated.state === State.Review) {
@@ -346,12 +351,12 @@ private isCardDue(card: CardData, now: Date): boolean {
     const dueMs = Date.parse(card.due);
     if (Number.isNaN(dueMs)) return false;
 
-    // 复习卡片按天计算，学习卡片按分钟计算
+    // Review 卡片按天粒度判断（当日即到期）
     if (card.state === State.Review) {
         return this.getLocalDayStartMs(new Date(dueMs)) <= this.getLocalDayStartMs(now);
     }
     
-    // Learning/Relearning 卡片保持时间精度
+    // New/Learning/Relearning 卡片按精确时间判断
     return dueMs <= now.getTime();
 }
 ```

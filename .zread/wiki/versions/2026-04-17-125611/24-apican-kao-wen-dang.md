@@ -29,12 +29,13 @@ Sources: [main.ts](src/main.ts#L8-L47)
 ### 卡片状态枚举 (State)
 ```typescript
 export enum State {
+    New = 0,           // 新建阶段（卡片创建后的初始状态）
     Learning = 1,      // 学习阶段
     Review = 2,        // 复习阶段  
     Relearning = 3,    // 重新学习阶段
 }
 ```
-**状态流转**：Learning → Review → Relearning → Review
+**状态流转**：New → Learning → Review → Relearning → Review（Easy 评分可从 New 直接跳至 Review）
 
 ### 复习评分枚举 (Rating)
 ```typescript
@@ -164,7 +165,7 @@ export interface IntervalPreview {
 ```
 
 **算法特性**：
-- 支持学习、复习、重新学习三种状态
+- 支持新建、学习、复习、重新学习四种状态
 - 实现间隔随机化（fuzzing）避免模式化
 - 处理逾期复习的间隔调整
 - 支持自定义难度系数调整
