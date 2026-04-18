@@ -1,3 +1,4 @@
+//复习视图组件
 import { ItemView, WorkspaceLeaf, MarkdownView, TFile, MarkdownRenderer } from "obsidian";
 import { CardData, Rating, State } from "./models";
 import { CardStore } from "./store";

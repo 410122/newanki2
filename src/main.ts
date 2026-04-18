@@ -64,7 +64,7 @@ export default class NewAnkiPlugin extends Plugin {
 				const selection = editor.getSelection();
 				if (!selection) return;
 
-				menu.addItem((item) => {
+				menu.addItem((item) => {  //右键菜单添加功能
 					item.setTitle("制作卡片")
 						.setIcon("plus-circle")
 						.onClick(() => {
@@ -74,7 +74,7 @@ export default class NewAnkiPlugin extends Plugin {
 							const cursor = editor.getCursor("from");
 							const cursorTo = editor.getCursor("to");
 
-							new CreateCardModal(
+							new CreateCardModal(  //创建卡片模态框
 								this.app,
 								selection,
 								file.path,

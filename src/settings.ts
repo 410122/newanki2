@@ -1,3 +1,7 @@
+//设置界面，
+// 配置：PluginSettingTab 类提供配置界面，
+//       CardStore 类管理数据持久化，
+//       PluginSettings 接口定义配置结构
 import { App, PluginSettingTab, Setting } from "obsidian";
 import type NewAnkiPlugin from "./main";
 

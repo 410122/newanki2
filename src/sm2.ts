@@ -1,3 +1,4 @@
+//算法实现
 import { CardData, Rating, State, PluginSettings } from "./models";
 
 export interface ScheduleResult {

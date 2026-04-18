@@ -1,3 +1,4 @@
+//卡片预览模态框
 import { App, Component, MarkdownRenderer, Modal, Notice } from "obsidian";
 import { CardData, State } from "./models";
 import { CardStore } from "./store";

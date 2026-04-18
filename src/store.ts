@@ -1,3 +1,4 @@
+//数据存储相关
 import { Plugin } from "obsidian";
 import { CardData, PluginData, PluginSettings, DEFAULT_PLUGIN_DATA, State } from "./models";
 
@@ -35,15 +36,18 @@ export class CardStore {
 		this.data.settings = value;
 	}
 
+	//获取文件所有卡片
 	getCardsForFile(filePath: string): CardData[] {
 		return this.data.cards[filePath] ?? [];
 	}
 
+	//获取到期卡片
 	getDueCardsForFile(filePath: string): CardData[] {
 		const now = new Date();
 		return this.getCardsForFile(filePath).filter((c) => this.isCardDue(c, now));
 	}
 
+	//全局查询
 	getAllCards(): CardData[] {
 		const all: CardData[] = [];
 		for (const cards of Object.values(this.data.cards)) {
@@ -57,6 +61,7 @@ export class CardStore {
 		return this.getAllCards().filter((c) => this.isCardDue(c, now));
 	}
 
+	//到期时间计算
 	private isCardDue(card: CardData, now: Date): boolean {
 		const dueMs = Date.parse(card.due);
 		if (Number.isNaN(dueMs)) {
@@ -82,6 +87,7 @@ export class CardStore {
 		);
 	}
 
+	//添加新卡片
 	async addCard(card: CardData): Promise<void> {
 		const filePath = card.sourceFile;
 		if (!this.data.cards[filePath]) {
@@ -91,6 +97,7 @@ export class CardStore {
 		await this.save();
 	}
 
+	//更新卡片数据
 	async updateCard(card: CardData): Promise<void> {
 		const filePath = card.sourceFile;
 		const cards = this.data.cards[filePath];
@@ -103,6 +110,7 @@ export class CardStore {
 		}
 	}
 
+	//删除指定卡片
 	async deleteCard(cardId: string, filePath: string): Promise<void> {
 		const cards = this.data.cards[filePath];
 		if (!cards) return;
@@ -131,6 +139,7 @@ export class CardStore {
 		return cards.length;
 	}
 
+	//文件重命名处理--自动更新卡片中的源文件路径
 	async handleFileRename(oldPath: string, newPath: string): Promise<boolean> {
 		let changed = false;
 		const entries = Object.entries(this.data.cards);
@@ -182,7 +191,7 @@ export class CardStore {
 		}
 		return changed;
 	}
-
+	//统计计数，状态栏显示
 	getCardCount(filePath: string): number {
 		return this.getCardsForFile(filePath).length;
 	}

@@ -1,3 +1,4 @@
+//制卡前端模态框
 import { App, Modal, Setting } from "obsidian";
 import { CardData, State } from "./models";
 
