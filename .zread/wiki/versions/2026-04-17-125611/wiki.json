@@ -1,0 +1,206 @@
+{
+  "id": "2026-04-17-125611",
+  "generated_at": "2026-04-17T04:56:11.802344Z",
+  "language": "zh",
+  "pages": [
+    {
+      "slug": "1-gai-shu",
+      "title": "概述",
+      "file": "1-gai-shu.md",
+      "section": "快速开始",
+      "level": "Beginner"
+    },
+    {
+      "slug": "2-kuai-su-ru-men",
+      "title": "快速入门",
+      "file": "2-kuai-su-ru-men.md",
+      "section": "快速开始",
+      "level": "Beginner"
+    },
+    {
+      "slug": "3-qia-pian-chuang-jian-yu-guan-li",
+      "title": "卡片创建与管理",
+      "file": "3-qia-pian-chuang-jian-yu-guan-li.md",
+      "section": "快速开始",
+      "group": "基础功能",
+      "level": "Beginner"
+    },
+    {
+      "slug": "4-fu-xi-xi-tong-pei-zhi",
+      "title": "复习系统配置",
+      "file": "4-fu-xi-xi-tong-pei-zhi.md",
+      "section": "快速开始",
+      "group": "基础功能",
+      "level": "Beginner"
+    },
+    {
+      "slug": "5-jie-mian-dao-hang-yu-cao-zuo",
+      "title": "界面导航与操作",
+      "file": "5-jie-mian-dao-hang-yu-cao-zuo.md",
+      "section": "快速开始",
+      "group": "基础功能",
+      "level": "Beginner"
+    },
+    {
+      "slug": "6-jia-gou-she-ji",
+      "title": "架构设计",
+      "file": "6-jia-gou-she-ji.md",
+      "section": "技术详解",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "7-he-xin-shu-ju-mo-xing",
+      "title": "核心数据模型",
+      "file": "7-he-xin-shu-ju-mo-xing.md",
+      "section": "技术详解",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "8-sm-2suan-fa-shi-xian",
+      "title": "SM-2算法实现",
+      "file": "8-sm-2suan-fa-shi-xian.md",
+      "section": "技术详解",
+      "level": "Advanced"
+    },
+    {
+      "slug": "9-cun-chu-yu-zhuang-tai-guan-li",
+      "title": "存储与状态管理",
+      "file": "9-cun-chu-yu-zhuang-tai-guan-li.md",
+      "section": "技术详解",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "10-yong-hu-jie-mian-zu-jian",
+      "title": "用户界面组件",
+      "file": "10-yong-hu-jie-mian-zu-jian.md",
+      "section": "技术详解",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "11-cha-jian-ji-cheng-yu-shi-jian-chu-li",
+      "title": "插件集成与事件处理",
+      "file": "11-cha-jian-ji-cheng-yu-shi-jian-chu-li.md",
+      "section": "技术详解",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "12-zi-ding-yi-shi-tu-kai-fa",
+      "title": "自定义视图开发",
+      "file": "12-zi-ding-yi-shi-tu-kai-fa.md",
+      "section": "技术详解",
+      "level": "Advanced"
+    },
+    {
+      "slug": "13-pei-zhi-yu-she-zhi-xi-tong",
+      "title": "配置与设置系统",
+      "file": "13-pei-zhi-yu-she-zhi-xi-tong.md",
+      "section": "技术详解",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "14-xing-neng-you-hua-yu-jian-kong",
+      "title": "性能优化与监控",
+      "file": "14-xing-neng-you-hua-yu-jian-kong.md",
+      "section": "技术详解",
+      "level": "Advanced"
+    },
+    {
+      "slug": "15-kai-fa-yu-gou-jian-liu-cheng",
+      "title": "开发与构建流程",
+      "file": "15-kai-fa-yu-gou-jian-liu-cheng.md",
+      "section": "技术详解",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "16-ce-shi-yu-diao-shi-ji-qiao",
+      "title": "测试与调试技巧",
+      "file": "16-ce-shi-yu-diao-shi-ji-qiao.md",
+      "section": "技术详解",
+      "level": "Advanced"
+    },
+    {
+      "slug": "17-fa-bu-yu-fen-fa-zhi-nan",
+      "title": "发布与分发指南",
+      "file": "17-fa-bu-yu-fen-fa-zhi-nan.md",
+      "section": "技术详解",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "18-quan-ju-fu-xi-xi-tong",
+      "title": "全局复习系统",
+      "file": "18-quan-ju-fu-xi-xi-tong.md",
+      "section": "高级功能",
+      "level": "Advanced"
+    },
+    {
+      "slug": "19-ben-di-wen-jian-fu-xi",
+      "title": "本地文件复习",
+      "file": "19-ben-di-wen-jian-fu-xi.md",
+      "section": "高级功能",
+      "level": "Advanced"
+    },
+    {
+      "slug": "20-qia-pian-yu-lan-mo-tai-kuang",
+      "title": "卡片预览模态框",
+      "file": "20-qia-pian-yu-lan-mo-tai-kuang.md",
+      "section": "高级功能",
+      "level": "Advanced"
+    },
+    {
+      "slug": "21-zhuang-tai-lan-yu-hui-zhang-xi-tong",
+      "title": "状态栏与徽章系统",
+      "file": "21-zhuang-tai-lan-yu-hui-zhang-xi-tong.md",
+      "section": "高级功能",
+      "level": "Advanced"
+    },
+    {
+      "slug": "22-you-jian-cai-dan-ji-cheng",
+      "title": "右键菜单集成",
+      "file": "22-you-jian-cai-dan-ji-cheng.md",
+      "section": "高级功能",
+      "level": "Advanced"
+    },
+    {
+      "slug": "23-kuai-jie-jian-ming-ling-xi-tong",
+      "title": "快捷键命令系统",
+      "file": "23-kuai-jie-jian-ming-ling-xi-tong.md",
+      "section": "高级功能",
+      "level": "Advanced"
+    },
+    {
+      "slug": "24-apican-kao-wen-dang",
+      "title": "API参考文档",
+      "file": "24-apican-kao-wen-dang.md",
+      "section": "开发参考",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "25-dai-ma-gui-fan-yu-zhi-liang",
+      "title": "代码规范与质量",
+      "file": "25-dai-ma-gui-fan-yu-zhi-liang.md",
+      "section": "开发参考",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "26-kuo-zhan-kai-fa-zhi-nan",
+      "title": "扩展开发指南",
+      "file": "26-kuo-zhan-kai-fa-zhi-nan.md",
+      "section": "开发参考",
+      "level": "Advanced"
+    },
+    {
+      "slug": "27-gu-zhang-pai-chu",
+      "title": "故障排除",
+      "file": "27-gu-zhang-pai-chu.md",
+      "section": "开发参考",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "28-zui-jia-shi-jian",
+      "title": "最佳实践",
+      "file": "28-zui-jia-shi-jian.md",
+      "section": "开发参考",
+      "level": "Intermediate"
+    }
+  ]
+}
