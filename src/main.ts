@@ -25,7 +25,9 @@ export default class NewAnkiPlugin extends Plugin {
 		this.registerFileEvents();
 		this.registerReviewAction();
 
-		this.globalReviewRibbonEl = this.addRibbonIcon("layers", "NewAnki 全局复习", () => {
+			const globalCounts = this.store.getTotalCardCountsByCategory();
+			const globalTitle = "NewAnki 全局复习 (" + globalCounts.new + "/" + globalCounts.learning + "/" + globalCounts.review + ")";
+		this.globalReviewRibbonEl = this.addRibbonIcon("layers", globalTitle, () => {
 			this.startGlobalReview();
 		});
 		this.globalReviewRibbonEl.addClass("newanki-global-review-ribbon");
@@ -111,7 +113,8 @@ export default class NewAnkiPlugin extends Plugin {
 
 				if (cardCount > 0) {
 					menu.addItem((item) => {
-						item.setTitle(`复习卡片 (${dueCount}/${cardCount} 到期)`)
+							const fileCounts = this.store.getCardCountsByCategory(file.path);
+						item.setTitle(`复习卡片 (${fileCounts.new}/${fileCounts.learning}/${fileCounts.review})`)
 							.setIcon("layers")
 							.onClick(() => {
 								this.startFileReview(file.path);
@@ -223,6 +226,7 @@ export default class NewAnkiPlugin extends Plugin {
 
 		const dueCount = this.store.getDueCardCount(view.file.path);
 		const cardCount = this.store.getCardCount(view.file.path);
+			const fileCounts = this.store.getCardCountsByCategory(view.file.path);
 
 		this.localPreviewActionEl = view.addAction(
 			"list",
@@ -237,7 +241,7 @@ export default class NewAnkiPlugin extends Plugin {
 
 		if (cardCount <= 0) return;
 
-		this.reviewActionEl = view.addAction("layers", `复习卡片 (${dueCount}/${cardCount} 到期)`, () => {
+		this.reviewActionEl = view.addAction("layers", `复习卡片 (${fileCounts.new}/${fileCounts.learning}/${fileCounts.review})`, () => {
 			if (view.file) {
 				this.startFileReview(view.file.path);
 			}
@@ -249,7 +253,7 @@ export default class NewAnkiPlugin extends Plugin {
 				text: dueCount >= 100 ? "99+" : String(dueCount),
 				cls: "newanki-badge",
 			});
-			badge.setAttr("aria-label", `待复习 ${dueCount} 张`);
+			badge.setAttr("aria-label", `新卡:${fileCounts.new} 学习:${fileCounts.learning} 复习:${fileCounts.review}`);
 		}
 	}
 
@@ -391,19 +395,22 @@ export default class NewAnkiPlugin extends Plugin {
 
 	private updateGlobalReviewRibbonBadge(): void {
 		if (!this.globalReviewRibbonEl) return;
+			// 更新工具提示标题
+			const globalCounts = this.store.getTotalCardCountsByCategory();
+			this.globalReviewRibbonEl.setAttr("title", "NewAnki 全局复习 (" + globalCounts.new + "/" + globalCounts.learning + "/" + globalCounts.review + ")");
 
 		if (this.globalReviewBadgeEl) {
 			this.globalReviewBadgeEl.remove();
 			this.globalReviewBadgeEl = null;
 		}
 
-		const totalDue = this.store.getTotalDueCount();
+			const totalDue = this.store.getTotalDueCount();
 		if (totalDue <= 0) return;
 
 		this.globalReviewBadgeEl = this.globalReviewRibbonEl.createEl("span", {
 			text: totalDue >= 100 ? "99+" : String(totalDue),
 			cls: "newanki-badge newanki-ribbon-badge",
 		});
-		this.globalReviewBadgeEl.setAttr("aria-label", `全局待复习 ${totalDue} 张`);
+		this.globalReviewBadgeEl.setAttr("aria-label", `全局 - 新卡:${globalCounts.new} 学习:${globalCounts.learning} 复习:${globalCounts.review}`);
 	}
 }

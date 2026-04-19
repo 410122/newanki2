@@ -214,4 +214,43 @@ export class CardStore {
 	getTotalDueCount(): number {
 		return this.getAllDueCards().length;
 	}
+
+	// 获取文件级别的分类计数
+	getCardCountsByCategory(filePath: string): { new: number; learning: number; review: number } {
+		const cards = this.getCardsForFile(filePath);
+		return this.calculateCategoryCounts(cards);
+	}
+
+	// 获取全局级别的分类计数
+	getTotalCardCountsByCategory(): { new: number; learning: number; review: number } {
+		const cards = this.getAllCards();
+		return this.calculateCategoryCounts(cards);
+	}
+
+	// 计算分类计数的辅助方法
+	private calculateCategoryCounts(cards: CardData[]): { new: number; learning: number; review: number } {
+		const now = timeService.now();
+		let newCount = 0;
+		let learningCount = 0;
+		let reviewCount = 0;
+
+		for (const card of cards) {
+			const isDue = this.isCardDue(card, now);
+
+			if (card.state === State.New) {
+				// 新卡片：State.New状态
+				newCount++;
+			} else if (card.inLearningQueue === true && isDue) {
+				// 正在学习的卡片：当日到期、在学习队列中（用户学习过但未毕业）
+				learningCount++;
+			} else if ((card.state === State.Review || card.state === State.Relearning) && isDue) {
+				// 待复习的卡片：当日到期、状态为Review或Relearning，且不在学习队列中
+				reviewCount++;
+			}
+			// 注意：State.Learning状态但不在学习队列中的卡片（尚未开始学习）不计入任何类别
+			// 根据用户定义，它们既不是"新卡片"也不是"正在学习的卡片"
+		}
+
+		return { new: newCount, learning: learningCount, review: reviewCount };
+	}
 }
