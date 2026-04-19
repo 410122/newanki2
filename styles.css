@@ -555,3 +555,22 @@
 	gap: 8px;
 	margin-top: 16px;
 }
+
+/* ── 答案文本模糊效果 ── */
+.newanki-blurred-text {
+	filter: blur(5px);
+	transition: filter 0.3s ease;
+	user-select: none;
+	pointer-events: none; /* 防止用户与模糊文本交互 */
+}
+
+/* 确保模糊效果在CodeMirror编辑器上生效 */
+.cm-line.newanki-blurred-text,
+.cm-content .newanki-blurred-text {
+	filter: blur(5px);
+}
+
+/* 可选：悬停时稍微减少模糊强度 */
+.newanki-blurred-text:hover {
+	filter: blur(3px);
+}

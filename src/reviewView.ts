@@ -21,6 +21,7 @@ export class ReviewView extends ItemView {
 	private session: ReviewSession | null = null;
 	private answerRevealed = false;
 	private sourceLeaf: WorkspaceLeaf | null = null;
+	private blurredElements: HTMLElement[] = [];
 
 	constructor(leaf: WorkspaceLeaf, store: CardStore, onCardsChanged?: () => void) {
 		super(leaf);
@@ -306,6 +307,7 @@ export class ReviewView extends ItemView {
 		});
 		btn.addEventListener("click", () => {
 			this.answerRevealed = true;
+			this.applyBlurEffect(false); // 移除模糊效果
 			this.render();
 		});
 	}
@@ -369,6 +371,7 @@ export class ReviewView extends ItemView {
 
 			this.session.currentIndex++;
 			this.answerRevealed = false;
+			this.applyBlurEffect(true); // 应用模糊效果到新卡片
 
 			this.render();
 			this.scrollToCardSource();
@@ -412,9 +415,13 @@ export class ReviewView extends ItemView {
 
 		if (!currentFile || currentFile.path !== card.sourceFile) {
 			await this.sourceLeaf.openFile(file);
-			setTimeout(() => this.highlightCardInEditor(card), 300);
+			setTimeout(() => {
+				this.highlightCardInEditor(card);
+				this.applyBlurEffect(!this.answerRevealed); // 根据状态应用模糊
+			}, 300);
 		} else {
 			this.highlightCardInEditor(card);
+			this.applyBlurEffect(!this.answerRevealed); // 根据状态应用模糊
 		}
 	}
 
@@ -439,6 +446,117 @@ export class ReviewView extends ItemView {
 		);
 	}
 
+	/**
+	 * 应用或移除模糊效果
+	 * @param blur true: 应用模糊效果, false: 移除模糊效果
+	 */
+	private applyBlurEffect(blur: boolean): void {
+		console.log(`applyBlurEffect called: blur=${blur}, answerRevealed=${this.answerRevealed}`);
+
+		// 清理之前的模糊效果
+		this.clearBlurEffect();
+
+		if (!this.sourceLeaf || !this.session || this.session.currentIndex >= this.session.cards.length) {
+			console.log('applyBlurEffect: missing sourceLeaf or session');
+			return;
+		}
+
+		const view = this.sourceLeaf.view;
+		if (!(view instanceof MarkdownView)) {
+			console.log('applyBlurEffect: view is not MarkdownView');
+			return;
+		}
+
+		const card = this.session.cards[this.session.currentIndex]!;
+		console.log(`applyBlurEffect: card lines ${card.lineStart}-${card.lineEnd}`);
+
+		// 获取编辑器DOM元素
+		const editorEl = this.getEditorElement(view);
+		if (!editorEl) {
+			console.log('applyBlurEffect: could not get editor element');
+			return;
+		}
+		console.log('applyBlurEffect: editor element found', editorEl);
+
+		// 查找对应行的DOM元素
+		const lineElements = this.findLineElements(editorEl, card.lineStart, card.lineEnd);
+		console.log(`applyBlurEffect: found ${lineElements.length} line elements`);
+
+		// 应用模糊效果
+		lineElements.forEach(el => {
+			if (blur) {
+				el.classList.add('newanki-blurred-text');
+				this.blurredElements.push(el);
+				console.log('applyBlurEffect: added blur to element', el);
+			} else {
+				el.classList.remove('newanki-blurred-text');
+				console.log('applyBlurEffect: removed blur from element', el);
+			}
+		});
+	}
+
+	/**
+	 * 清理所有模糊效果
+	 */
+	private clearBlurEffect(): void {
+		this.blurredElements.forEach(el => {
+			el.classList.remove('newanki-blurred-text');
+		});
+		this.blurredElements = [];
+	}
+
+	/**
+	 * 获取编辑器DOM元素
+	 */
+	private getEditorElement(view: MarkdownView): HTMLElement | null {
+		// 方法1: 通过cm属性访问CodeMirror实例
+		const editor = view.editor;
+		if ((editor as any).cm) {
+			return (editor as any).cm.dom;
+		}
+
+		// 方法2: 通过CSS选择器查找编辑器容器
+		const container = view.containerEl;
+		return container.querySelector('.cm-editor') as HTMLElement;
+	}
+
+	/**
+	 * 根据行号查找DOM元素
+	 */
+	private findLineElements(editorEl: HTMLElement, startLine: number, endLine: number): HTMLElement[] {
+		const lineElements: HTMLElement[] = [];
+
+		console.log(`findLineElements: looking for lines ${startLine}-${endLine} in editorEl`, editorEl);
+
+		// CodeMirror 6 中行元素通常有 data-line 属性
+		for (let line = startLine; line <= endLine; line++) {
+			const selector = `[data-line="${line}"]`;
+			const elements = editorEl.querySelectorAll<HTMLElement>(selector);
+			console.log(`findLineElements: selector "${selector}" found ${elements.length} elements`);
+			elements.forEach(el => lineElements.push(el));
+		}
+
+		// 如果上述方法失败，尝试备用选择器
+		if (lineElements.length === 0) {
+			console.warn('无法通过data-line找到行元素，尝试备用选择器');
+			// 备用：通过.cm-line类选择所有行，然后根据行号筛选
+			const allLines = editorEl.querySelectorAll<HTMLElement>('.cm-line');
+			console.log(`findLineElements: found ${allLines.length} .cm-line elements`);
+
+			// 尝试通过行号映射：假设.cm-line元素按顺序对应行号
+			// 注意：这种方法不可靠，但作为备用方案
+			for (let i = 0; i < allLines.length; i++) {
+				const lineNo = i; // 从0开始的行号
+				if (lineNo >= startLine && lineNo <= endLine) {
+					lineElements.push(allLines[i]);
+				}
+			}
+			console.log(`findLineElements: after filtering, ${lineElements.length} elements match line range`);
+		}
+
+		return lineElements;
+	}
+
 	async onOpen(): Promise<void> {
 		this.contentEl.empty();
 		this.contentEl.addClass("newanki-review-container");
@@ -456,6 +574,7 @@ export class ReviewView extends ItemView {
 	}
 
 	async onClose(): Promise<void> {
+		this.clearBlurEffect();
 		this.contentEl.empty();
 	}
 }
