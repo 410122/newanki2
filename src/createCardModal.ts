@@ -1,6 +1,7 @@
 //制卡前端模态框
 import { App, Modal, Setting } from "obsidian";
 import { CardData, State } from "./models";
+import { timeService } from "./timeService";
 
 export class CreateCardModal extends Modal {
 	private answer: string;
@@ -70,9 +71,9 @@ export class CreateCardModal extends Modal {
 				state: State.New,
 				step: null,
 				ease: null,
-				due: new Date().toISOString(),
+				due: timeService.nowISO(),
 				currentInterval: null,
-				createdAt: new Date().toISOString(),
+				createdAt: timeService.nowISO(),
 			};
 			this.onSubmit(card);
 			this.close();
@@ -89,6 +90,6 @@ export class CreateCardModal extends Modal {
 	}
 
 	private generateId(): string {
-		return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+		return timeService.nowTimestamp().toString(36) + Math.random().toString(36).substring(2, 9);
 	}
 }

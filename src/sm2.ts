@@ -1,5 +1,6 @@
 //算法实现
 import { CardData, Rating, State, PluginSettings } from "./models";
+import { timeService } from "./timeService";
 
 export interface ScheduleResult {
 	card: CardData;
@@ -74,7 +75,7 @@ export function reviewCard(
 	reviewDatetime?: string
 ): ScheduleResult {
 	const updated = deepCopyCard(card);
-	const now = reviewDatetime ?? new Date().toISOString();
+	const now = reviewDatetime ?? timeService.nowISO();
 
 	if (updated.state === State.New) {
 		const ls = settings.learningSteps;
@@ -300,7 +301,7 @@ export function getNextIntervals(
 	card: CardData,
 	settings: PluginSettings
 ): IntervalPreview[] {
-	const now = new Date().toISOString();
+	const now = timeService.nowISO();
 	const ratings = [Rating.Again, Rating.Hard, Rating.Good, Rating.Easy];
 
 	return ratings.map((rating) => {

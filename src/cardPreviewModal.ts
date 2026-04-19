@@ -2,6 +2,7 @@
 import { App, Component, MarkdownRenderer, Modal, Notice } from "obsidian";
 import { CardData, State } from "./models";
 import { CardStore } from "./store";
+import { timeService } from "./timeService";
 
 type PreviewScope = "global" | "local";
 
@@ -255,9 +256,9 @@ export class CardPreviewModal extends Modal {
 				state: State.New,
 				step: null,
 				ease: null,
-				due: new Date().toISOString(),
+				due: timeService.nowISO(),
 				currentInterval: null,
-				createdAt: new Date().toISOString(),
+				createdAt: timeService.nowISO(),
 			};
 
 			await this.store.addCard(card);
@@ -481,6 +482,6 @@ export class CardPreviewModal extends Modal {
 	}
 
 	private generateId(): string {
-		return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+		return timeService.nowTimestamp().toString(36) + Math.random().toString(36).substring(2, 9);
 	}
 }

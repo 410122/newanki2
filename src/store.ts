@@ -1,6 +1,7 @@
 //数据存储相关
 import { Plugin } from "obsidian";
 import { CardData, PluginData, PluginSettings, DEFAULT_PLUGIN_DATA, State } from "./models";
+import { timeService } from "./timeService";
 
 export class CardStore {
 	private plugin: Plugin;
@@ -43,7 +44,7 @@ export class CardStore {
 
 	//获取到期卡片
 	getDueCardsForFile(filePath: string): CardData[] {
-		const now = new Date();
+		const now = timeService.now();
 		return this.getCardsForFile(filePath).filter((c) => this.isCardDue(c, now));
 	}
 
@@ -57,7 +58,7 @@ export class CardStore {
 	}
 
 	getAllDueCards(): CardData[] {
-		const now = new Date();
+		const now = timeService.now();
 		return this.getAllCards().filter((c) => this.isCardDue(c, now));
 	}
 
@@ -126,7 +127,7 @@ export class CardStore {
 		const cards = this.data.cards[filePath];
 		if (!cards || cards.length === 0) return 0;
 
-		const now = new Date().toISOString();
+		const now = timeService.nowISO();
 		this.data.cards[filePath] = cards.map((card) => ({
 			...card,
 			state: State.New,
