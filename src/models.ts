@@ -25,6 +25,7 @@ export interface CardData {
 	due: string;
 	currentInterval: number | null;
 	createdAt: string;
+	inLearningQueue?: boolean;  // 标记卡片是否正在学习队列中
 }
 
 export interface ReviewLogData {

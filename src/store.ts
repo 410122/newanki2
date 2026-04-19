@@ -64,6 +64,11 @@ export class CardStore {
 
 	//到期时间计算
 	private isCardDue(card: CardData, now: Date): boolean {
+		// 如果卡片正在学习队列中，则视为到期
+		if (card.inLearningQueue === true) {
+			return true;
+		}
+
 		const dueMs = Date.parse(card.due);
 		if (Number.isNaN(dueMs)) {
 			return false;
@@ -135,6 +140,7 @@ export class CardStore {
 			ease: null,
 			due: now,
 			currentInterval: null,
+			inLearningQueue: false,
 		}));
 		await this.save();
 		return cards.length;

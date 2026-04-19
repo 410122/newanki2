@@ -9,4 +9,4 @@
 // export const MOCK_TIME: string | null = null;
 
 export const TIME_MODE: 'online' | 'offline' = 'offline';
-export const MOCK_TIME: string | null = '2026-04-23T00:00:00.000Z';
+export const MOCK_TIME: string | null = '2026-04-23T00:08:00.000Z';

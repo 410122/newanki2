@@ -313,6 +313,18 @@ export default class NewAnkiPlugin extends Plugin {
 
 		const reviewView = reviewLeaf.view as ReviewView;
 		reviewView.setSourceLeaf(sourceLeaf);
+		// 设置卡片为正在学习队列中
+		await Promise.all(
+			dueCards.map(card => {
+				if (card.inLearningQueue !== true) {
+					card.inLearningQueue = true;
+					return this.store.updateCard(card);
+				}
+				return Promise.resolve();
+			})
+		).catch(error => {
+			console.error("Failed to set cards in learning queue:", error);
+		});
 		reviewView.startReview(dueCards, false, filePath);
 	}
 
@@ -333,6 +345,18 @@ export default class NewAnkiPlugin extends Plugin {
 
 		const reviewView = reviewLeaf.view as ReviewView;
 		reviewView.setSourceLeaf(sourceLeaf);
+		// 设置卡片为正在学习队列中
+		await Promise.all(
+			dueCards.map(card => {
+				if (card.inLearningQueue !== true) {
+					card.inLearningQueue = true;
+					return this.store.updateCard(card);
+				}
+				return Promise.resolve();
+			})
+		).catch(error => {
+			console.error("Failed to set cards in learning queue:", error);
+		});
 		reviewView.startReview(dueCards, true, null);
 	}
 

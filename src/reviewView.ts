@@ -348,6 +348,12 @@ export class ReviewView extends ItemView {
 
 	private async handleRating(card: CardData, rating: Rating): Promise<void> {
 		const result = reviewCard(card, rating, this.store.settings);
+		// 根据卡片状态更新inLearningQueue
+		if (result.card.state === State.Review) {
+			result.card.inLearningQueue = false;
+		} else {
+			result.card.inLearningQueue = true;
+		}
 		await this.store.updateCard(result.card);
 		this.onCardsChanged?.();
 
@@ -439,6 +445,14 @@ export class ReviewView extends ItemView {
 		const wrap = this.contentEl.createDiv({ cls: "newanki-empty" });
 		wrap.createEl("h3", { text: "NewAnki 复习" });
 		wrap.createEl("p", { text: "请通过文件菜单或命令面板启动复习。" });
+	}
+
+	private async setCardInLearningQueue(card: CardData, inQueue: boolean): Promise<void> {
+		if (card.inLearningQueue === inQueue) {
+			return;
+		}
+		card.inLearningQueue = inQueue;
+		await this.store.updateCard(card);
 	}
 
 	async onClose(): Promise<void> {
