@@ -87,6 +87,34 @@ export class CardStore {
 		return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 	}
 
+	// 获取指定日期有到期卡片的文件列表
+	getFilesWithDueCardsByDate(targetDate: Date): string[] {
+		const targetDayStart = this.getLocalDayStartMs(targetDate);
+		const targetDayEnd = targetDayStart + 24 * 60 * 60 * 1000 - 1;
+		const files = new Set<string>();
+
+		for (const [filePath, cards] of Object.entries(this.data.cards)) {
+			for (const card of cards) {
+				const dueMs = Date.parse(card.due);
+				if (Number.isNaN(dueMs)) continue;
+
+				let isDue = false;
+				if (card.state === State.Review) {
+					isDue = this.getLocalDayStartMs(new Date(dueMs)) <= targetDayStart;
+				} else {
+					isDue = dueMs <= targetDayEnd;
+				}
+
+				if (isDue) {
+					files.add(filePath);
+					break;
+				}
+			}
+		}
+
+		return Array.from(files);
+	}
+
 	getFilesWithCards(): string[] {
 		return Object.keys(this.data.cards).filter(
 			(k) => (this.data.cards[k]?.length ?? 0) > 0

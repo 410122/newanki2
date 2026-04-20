@@ -281,6 +281,38 @@ export default class NewAnkiPlugin extends Plugin {
 
 	private registerFileEvents(): void {
 		this.registerEvent(
+			this.app.vault.on("create", async (file: TAbstractFile) => {
+				if (!(file instanceof TFile) || file.extension !== "md") return;
+
+				// 检测是否是 journals/ 文件夹下的 daily note
+				const match = file.path.match(/^journals\/(\d{4})_(\d{2})_(\d{2})\.md$/);
+				if (!match) return;
+
+				const year = parseInt(match[1]!, 10);
+				const month = parseInt(match[2]!, 10) - 1;
+				const day = parseInt(match[3]!, 10);
+				const targetDate = new Date(year, month, day);
+
+				const dueFiles = this.store.getFilesWithDueCardsByDate(targetDate);
+				if (dueFiles.length === 0) return;
+
+				// 生成链接文本：取文件名（不含路径和扩展名）
+				const links = dueFiles.map(f => {
+					const name = f.replace(/^.*\//, "").replace(/\.md$/, "");
+					return `[[${name}]]`;
+				}).join(", ");
+
+				const reviewSection = `\n## Review\n${links}\n`;
+
+				// 延迟写入，等待 Calendar 插件完成模板写入
+				setTimeout(async () => {
+					const content = await this.app.vault.read(file);
+					await this.app.vault.modify(file, content + reviewSection);
+				}, 500);
+			})
+		);
+
+		this.registerEvent(
 			this.app.vault.on("rename", async (file: TAbstractFile, oldPath: string) => {
 				if (file instanceof TFile && file.extension !== "md") return;
 				const changed = await this.store.handleFileRename(oldPath, file.path);
