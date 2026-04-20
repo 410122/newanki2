@@ -1,8 +1,64 @@
 //复习视图组件
-import { ItemView, WorkspaceLeaf, MarkdownView, TFile, MarkdownRenderer } from "obsidian";
+import { ItemView, WorkspaceLeaf, MarkdownView, TFile, MarkdownRenderer, Modal, App, Setting } from "obsidian";
 import { CardData, Rating, State } from "./models";
 import { CardStore } from "./store";
 import { reviewCard, getNextIntervals } from "./sm2";
+import { timeService } from "./timeService";
+
+class CustomDaysModal extends Modal {
+	private days: number | null = null;
+	private onSubmit: (days: number) => void;
+
+	constructor(app: App, onSubmit: (days: number) => void) {
+		super(app);
+		this.onSubmit = onSubmit;
+	}
+
+	onOpen(): void {
+		const { contentEl } = this;
+		contentEl.createEl("h3", { text: "自定义到期天数" });
+
+		new Setting(contentEl)
+			.setName("天数")
+			.setDesc("指定多少天后该卡片到期")
+			.addText((text) => {
+				text.setPlaceholder("例如: 5");
+				text.inputEl.type = "number";
+				text.inputEl.min = "1";
+				text.inputEl.addEventListener("input", () => {
+					const val = parseInt(text.getValue());
+					this.days = isNaN(val) || val < 1 ? null : val;
+				});
+				text.inputEl.addEventListener("keydown", (e) => {
+					if (e.key === "Enter" && this.days !== null) {
+						this.onSubmit(this.days);
+						this.close();
+					}
+				});
+				setTimeout(() => text.inputEl.focus(), 50);
+			});
+
+		new Setting(contentEl)
+			.addButton((btn) => {
+				btn.setButtonText("确定")
+					.setCta()
+					.onClick(() => {
+						if (this.days !== null) {
+							this.onSubmit(this.days);
+							this.close();
+						}
+					});
+			})
+			.addButton((btn) => {
+				btn.setButtonText("取消")
+					.onClick(() => this.close());
+			});
+	}
+
+	onClose(): void {
+		this.contentEl.empty();
+	}
+}
 
 export const REVIEW_VIEW_TYPE = "newanki-review-view";
 
@@ -346,6 +402,18 @@ export class ReviewView extends ItemView {
 				await this.handleRating(card, preview.rating);
 			});
 		}
+
+		// 自定义天数按钮
+		const customWrap = container.createDiv({ cls: "newanki-custom-days-wrap" });
+		const customBtn = customWrap.createEl("button", {
+			text: "自定义天数",
+			cls: "newanki-rating-btn newanki-btn-custom-days",
+		});
+		customBtn.addEventListener("click", () => {
+			new CustomDaysModal(this.app, async (days: number) => {
+				await this.handleCustomDays(card, days);
+			}).open();
+		});
 	}
 
 	private async handleRating(card: CardData, rating: Rating): Promise<void> {
@@ -373,6 +441,37 @@ export class ReviewView extends ItemView {
 			this.answerRevealed = false;
 			this.applyBlurEffect(true); // 应用模糊效果到新卡片
 
+			this.render();
+			this.scrollToCardSource();
+		}
+	}
+
+	private async handleCustomDays(card: CardData, days: number): Promise<void> {
+		const now = timeService.nowISO();
+		const dueDate = new Date(now);
+		dueDate.setTime(dueDate.getTime() + days * 24 * 60 * 60 * 1000);
+
+		card.due = dueDate.toISOString();
+		card.currentInterval = days;
+		card.inLearningQueue = false;
+
+		// 非 Review 状态的卡片，直接毕业到 Review
+		if (card.state !== State.Review) {
+			card.state = State.Review;
+			card.step = null;
+			if (card.ease === null) {
+				card.ease = this.store.settings.startingEase;
+			}
+		}
+
+		await this.store.updateCard(card);
+		this.onCardsChanged?.();
+
+		if (this.session) {
+			this.session.reviewed++;
+			this.session.currentIndex++;
+			this.answerRevealed = false;
+			this.applyBlurEffect(true);
 			this.render();
 			this.scrollToCardSource();
 		}
