@@ -1,6 +1,6 @@
 //数据存储相关
 import { Plugin } from "obsidian";
-import { CardData, PluginData, PluginSettings, DEFAULT_PLUGIN_DATA, State } from "./models";
+import { CardData, PluginData, PluginSettings, ReviewLogData, DEFAULT_PLUGIN_DATA, State } from "./models";
 import { timeService } from "./timeService";
 
 export class CardStore {
@@ -21,6 +21,9 @@ export class CardStore {
 			}
 			if (!this.data.settings) {
 				this.data.settings = { ...DEFAULT_PLUGIN_DATA.settings };
+			}
+			if (!this.data.reviewLogs) {
+				this.data.reviewLogs = {};
 			}
 		}
 	}
@@ -153,7 +156,21 @@ export class CardStore {
 		if (this.data.cards[filePath].length === 0) {
 			delete this.data.cards[filePath];
 		}
+		delete this.data.reviewLogs[cardId];
 		await this.save();
+	}
+
+	// 复习日志相关
+	async addReviewLog(log: ReviewLogData): Promise<void> {
+		if (!this.data.reviewLogs[log.cardId]) {
+			this.data.reviewLogs[log.cardId] = [];
+		}
+		this.data.reviewLogs[log.cardId]!.push(log);
+		await this.save();
+	}
+
+	getReviewLogs(cardId: string): ReviewLogData[] {
+		return this.data.reviewLogs[cardId] ?? [];
 	}
 
 	async resetReviewProgressForFile(filePath: string): Promise<number> {

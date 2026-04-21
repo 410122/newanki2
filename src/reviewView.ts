@@ -1,6 +1,6 @@
 //复习视图组件
 import { ItemView, WorkspaceLeaf, MarkdownView, TFile, MarkdownRenderer, Modal, App, Setting } from "obsidian";
-import { CardData, Rating, State } from "./models";
+import { CardData, Rating, ReviewLogData, State } from "./models";
 import { CardStore } from "./store";
 import { reviewCard, getNextIntervals } from "./sm2";
 import { timeService } from "./timeService";
@@ -425,6 +425,19 @@ export class ReviewView extends ItemView {
 			result.card.inLearningQueue = true;
 		}
 		await this.store.updateCard(result.card);
+
+		// 记录复习日志
+		const log: ReviewLogData = {
+			cardId: card.cardId,
+			rating,
+			reviewDatetime: result.reviewDatetime,
+			prevState: card.state,
+			prevEase: card.ease,
+			prevInterval: card.currentInterval,
+			newDue: result.card.due,
+		};
+		await this.store.addReviewLog(log);
+
 		this.onCardsChanged?.();
 
 		if (this.session) {
@@ -448,6 +461,10 @@ export class ReviewView extends ItemView {
 
 	private async handleCustomDays(card: CardData, days: number): Promise<void> {
 		const now = timeService.nowISO();
+		const prevState = card.state;
+		const prevEase = card.ease;
+		const prevInterval = card.currentInterval;
+
 		const dueDate = new Date(now);
 		dueDate.setTime(dueDate.getTime() + days * 24 * 60 * 60 * 1000);
 
@@ -465,6 +482,19 @@ export class ReviewView extends ItemView {
 		}
 
 		await this.store.updateCard(card);
+
+		// 记录复习日志（自定义天数用 Good 评级记录）
+		const log: ReviewLogData = {
+			cardId: card.cardId,
+			rating: Rating.Good,
+			reviewDatetime: now,
+			prevState,
+			prevEase,
+			prevInterval,
+			newDue: card.due,
+		};
+		await this.store.addReviewLog(log);
+
 		this.onCardsChanged?.();
 
 		if (this.session) {
@@ -647,7 +677,7 @@ export class ReviewView extends ItemView {
 			for (let i = 0; i < allLines.length; i++) {
 				const lineNo = i; // 从0开始的行号
 				if (lineNo >= startLine && lineNo <= endLine) {
-					lineElements.push(allLines[i]);
+					lineElements.push(allLines[i]!);
 				}
 			}
 			console.log(`findLineElements: after filtering, ${lineElements.length} elements match line range`);

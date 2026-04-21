@@ -35,6 +35,7 @@ export interface ReviewLogData {
 	prevState: State;
 	prevEase: number | null;
 	prevInterval: number | null;
+	newDue: string;
 }
 
 export interface PluginSettings {
@@ -68,9 +69,11 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 export interface PluginData {
 	settings: PluginSettings;
 	cards: Record<string, CardData[]>;
+	reviewLogs: Record<string, ReviewLogData[]>;
 }
 
 export const DEFAULT_PLUGIN_DATA: PluginData = {
 	settings: { ...DEFAULT_SETTINGS },
 	cards: {},
+	reviewLogs: {},
 };

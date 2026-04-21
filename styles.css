@@ -589,3 +589,30 @@
 .newanki-blurred-text:hover {
 	filter: blur(3px);
 }
+
+/* ── Card Log Table ── */
+.newanki-card-log-wrap {
+	margin-top: 8px;
+}
+
+.newanki-log-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.newanki-log-table th,
+.newanki-log-table td {
+	border: 1px solid var(--background-modifier-border);
+	padding: 6px 10px;
+	text-align: left;
+}
+
+.newanki-log-table th {
+	background: var(--background-secondary);
+	font-weight: 600;
+}
+
+.newanki-log-table tr:hover {
+	background: var(--background-secondary-alt);
+}

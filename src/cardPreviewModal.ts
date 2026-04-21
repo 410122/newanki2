@@ -1,6 +1,6 @@
 //卡片预览模态框
 import { App, Component, MarkdownRenderer, Modal, Notice } from "obsidian";
-import { CardData, State } from "./models";
+import { CardData, Rating, State } from "./models";
 import { CardStore } from "./store";
 import { timeService } from "./timeService";
 
@@ -388,6 +388,59 @@ export class CardPreviewModal extends Modal {
 			new Notice("卡片已删除");
 			this.render();
 		});
+
+		// 查看日志按钮
+		let logVisible = false;
+		const logWrap = item.createDiv({ cls: "newanki-card-log-wrap" });
+		logWrap.style.display = "none";
+
+		const logBtn = actions.createEl("button", { text: "查看日志" });
+		logBtn.addEventListener("click", () => {
+			logVisible = !logVisible;
+			logWrap.style.display = logVisible ? "" : "none";
+			logBtn.setText(logVisible ? "隐藏日志" : "查看日志");
+			if (logVisible) {
+				this.renderLogTable(logWrap, card.cardId);
+			}
+		});
+	}
+
+	private ratingLabel(rating: Rating): string {
+		switch (rating) {
+			case Rating.Again: return "重来";
+			case Rating.Hard: return "困难";
+			case Rating.Good: return "良好";
+			case Rating.Easy: return "简单";
+			default: return String(rating);
+		}
+	}
+
+	private renderLogTable(container: HTMLElement, cardId: string): void {
+		container.empty();
+		const logs = this.store.getReviewLogs(cardId);
+
+		if (logs.length === 0) {
+			container.createEl("div", {
+				cls: "newanki-card-empty",
+				text: "暂无复习记录",
+			});
+			return;
+		}
+
+		const table = container.createEl("table", { cls: "newanki-log-table" });
+		const thead = table.createEl("thead");
+		const headerRow = thead.createEl("tr");
+		headerRow.createEl("th", { text: "复习时间" });
+		headerRow.createEl("th", { text: "操作" });
+		headerRow.createEl("th", { text: "到期时间" });
+
+		const tbody = table.createEl("tbody");
+		for (const log of logs) {
+			const row = tbody.createEl("tr");
+			row.createEl("td", { text: this.formatDateTime(log.reviewDatetime) });
+			row.createEl("td", { text: this.ratingLabel(log.rating) });
+			row.createEl("td", { text: this.formatDateTime(log.newDue) });
+		}
 	}
 
 	private getCards(): CardData[] {
