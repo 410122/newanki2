@@ -1,4 +1,4 @@
-import { Editor, MarkdownView, Notice, Plugin, TFile, TAbstractFile, WorkspaceLeaf } from "obsidian";
+import { Editor, MarkdownView, Notice, Plugin, TFile, TFolder, TAbstractFile, WorkspaceLeaf } from "obsidian";
 import { CardStore } from "./store";
 import { CreateCardModal } from "./createCardModal";
 import { CardPreviewModal } from "./cardPreviewModal";
@@ -98,6 +98,22 @@ export default class NewAnkiPlugin extends Plugin {
 	private registerFileMenu(): void {
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file) => {
+				// 文件夹右键菜单
+				if (file instanceof TFolder) {
+					const folderCards = this.store.getCardsForFolder(file.path);
+					if (folderCards.length > 0) {
+						const folderCounts = this.store.getCardCountsByCategoryForFolder(file.path);
+						menu.addItem((item) => {
+							item.setTitle(`复习文件夹卡片 (${folderCounts.new}/${folderCounts.learning}/${folderCounts.review})`)
+								.setIcon("layers")
+								.onClick(() => {
+									this.startFolderReview(file.path);
+								});
+						});
+					}
+					return;
+				}
+
 				if (!(file instanceof TFile) || file.extension !== "md") return;
 
 				const cardCount = this.store.getCardCount(file.path);
@@ -362,6 +378,38 @@ export default class NewAnkiPlugin extends Plugin {
 			console.error("Failed to set cards in learning queue:", error);
 		});
 		reviewView.startReview(dueCards, false, filePath);
+	}
+
+	private async startFolderReview(folderPath: string): Promise<void> {
+		const dueCards = this.store.getDueCardsForFolder(folderPath);
+		if (dueCards.length === 0) {
+			new Notice("该文件夹没有到期的卡片。");
+			return;
+		}
+
+		const { reviewLeaf, sourceLeaf } = await this.createSplitLayout();
+
+		const firstCard = dueCards[0]!;
+		const file = this.app.vault.getAbstractFileByPath(firstCard.sourceFile);
+		if (file instanceof TFile) {
+			await sourceLeaf.openFile(file);
+		}
+
+		const reviewView = reviewLeaf.view as ReviewView;
+		reviewView.setSourceLeaf(sourceLeaf);
+		// 设置卡片为正在学习队列中
+		await Promise.all(
+			dueCards.map(card => {
+				if (card.inLearningQueue !== true) {
+					card.inLearningQueue = true;
+					return this.store.updateCard(card);
+				}
+				return Promise.resolve();
+			})
+		).catch(error => {
+			console.error("Failed to set cards in learning queue:", error);
+		});
+		reviewView.startReview(dueCards, true, null);
 	}
 
 	private async startGlobalReview(): Promise<void> {

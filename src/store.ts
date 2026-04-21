@@ -243,6 +243,30 @@ export class CardStore {
 		}
 		return changed;
 	}
+	// 获取文件夹下所有卡片
+	getCardsForFolder(folderPath: string): CardData[] {
+		const prefix = folderPath + "/";
+		const all: CardData[] = [];
+		for (const [filePath, cards] of Object.entries(this.data.cards)) {
+			if (filePath.startsWith(prefix)) {
+				all.push(...cards);
+			}
+		}
+		return all;
+	}
+
+	// 获取文件夹下所有到期卡片
+	getDueCardsForFolder(folderPath: string): CardData[] {
+		const now = timeService.now();
+		return this.getCardsForFolder(folderPath).filter((c) => this.isCardDue(c, now));
+	}
+
+	// 获取文件夹级别的分类计数
+	getCardCountsByCategoryForFolder(folderPath: string): { new: number; learning: number; review: number } {
+		const cards = this.getCardsForFolder(folderPath);
+		return this.calculateCategoryCounts(cards);
+	}
+
 	//统计计数，状态栏显示
 	getCardCount(filePath: string): number {
 		return this.getCardsForFile(filePath).length;
