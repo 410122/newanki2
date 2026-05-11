@@ -355,7 +355,13 @@
 
 /* ── Card Preview Modal ── */
 .newanki-card-preview-modal .modal {
-	width: min(980px, 92vw);
+	width: min(1480px, 92vw);
+	min-width: 600px;
+	min-height: 400px;
+	max-width: 95vw;
+	max-height: 90vh;
+	resize: both;
+	overflow: auto;
 }
 
 .newanki-card-preview-header {

@@ -36,7 +36,7 @@ export class CardPreviewModal extends Modal {
 
 	onOpen(): void {
 		this.markdownComponent.load();
-		this.modalEl.addClass("newanki-card-preview-modal");
+		this.containerEl.addClass("newanki-card-preview-modal");
 		this.render();
 	}
 
