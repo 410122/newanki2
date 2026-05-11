@@ -473,9 +473,8 @@ export class CardPreviewModal extends Modal {
 	}
 
 	private getGlobalFilePaths(): string[] {
-		return this.app.vault
-			.getMarkdownFiles()
-			.map((f) => f.path)
+		return this.store
+			.getFilesWithCards()
 			.sort((a, b) => a.localeCompare(b, "zh-CN"));
 	}
 
