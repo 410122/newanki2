@@ -323,6 +323,8 @@ export default class NewAnkiPlugin extends Plugin {
 				// 延迟写入，等待 Calendar 插件完成模板写入
 				setTimeout(async () => {
 					const content = await this.app.vault.read(file);
+					// 已存在 ## Review 字段则跳过，避免重复追加（vault 初次加载时 create 事件会对已有文件触发）
+					if (/^##\s+Review\s*$/m.test(content)) return;
 					await this.app.vault.modify(file, content + reviewSection);
 				}, 500);
 			})
