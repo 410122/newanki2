@@ -35,7 +35,11 @@ class CustomDaysModal extends Modal {
 						this.close();
 					}
 				});
-				setTimeout(() => text.inputEl.focus(), 50);
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => {
+						text.inputEl.focus();
+					});
+				});
 			});
 
 		new Setting(contentEl)
@@ -78,6 +82,8 @@ export class ReviewView extends ItemView {
 	private answerRevealed = false;
 	private sourceLeaf: WorkspaceLeaf | null = null;
 	private blurredElements: HTMLElement[] = [];
+	private isUserEditing = false;
+	private scrollToSourceTimeoutId: number | null = null;
 
 	constructor(leaf: WorkspaceLeaf, store: CardStore, onCardsChanged?: () => void) {
 		super(leaf);
@@ -111,8 +117,15 @@ export class ReviewView extends ItemView {
 			sourceFile,
 		};
 		this.answerRevealed = false;
+		this.isUserEditing = false;
+		if (this.scrollToSourceTimeoutId !== null) {
+			clearTimeout(this.scrollToSourceTimeoutId);
+		}
 		this.render();
-		setTimeout(() => this.scrollToCardSource(), 500);
+		this.scrollToSourceTimeoutId = window.setTimeout(() => {
+			this.scrollToSourceTimeoutId = null;
+			this.scrollToCardSource();
+		}, 500);
 	}
 
 	private render(): void {
@@ -374,6 +387,11 @@ export class ReviewView extends ItemView {
 		const enterEditMode = () => {
 			if (isEditing) return;
 			isEditing = true;
+			this.isUserEditing = true;
+			if (this.scrollToSourceTimeoutId !== null) {
+				clearTimeout(this.scrollToSourceTimeoutId);
+				this.scrollToSourceTimeoutId = null;
+			}
 			input.value = committedValue;
 			input.style.display = "";
 			preview.style.display = "none";
@@ -386,6 +404,7 @@ export class ReviewView extends ItemView {
 		const exitEditMode = async (save: boolean) => {
 			if (!isEditing) return;
 			isEditing = false;
+			this.isUserEditing = false;
 
 			if (save) {
 				const nextValue = input.value.trim();
@@ -402,7 +421,8 @@ export class ReviewView extends ItemView {
 			await renderPreview(committedValue);
 		};
 
-		preview.addEventListener("click", () => {
+		preview.addEventListener("mousedown", (evt) => {
+			evt.preventDefault();
 			enterEditMode();
 		});
 
@@ -480,6 +500,10 @@ export class ReviewView extends ItemView {
 			cls: "newanki-rating-btn newanki-btn-custom-days",
 		});
 		customBtn.addEventListener("click", () => {
+			if (this.scrollToSourceTimeoutId !== null) {
+				clearTimeout(this.scrollToSourceTimeoutId);
+				this.scrollToSourceTimeoutId = null;
+			}
 			new CustomDaysModal(this.app, async (days: number) => {
 				await this.handleCustomDays(card, days);
 			}).open();
@@ -614,13 +638,21 @@ export class ReviewView extends ItemView {
 
 		if (!currentFile || currentFile.path !== card.sourceFile) {
 			await this.sourceLeaf.openFile(file);
-			setTimeout(() => {
-				this.highlightCardInEditor(card);
-				this.applyBlurEffect(!this.answerRevealed); // 根据状态应用模糊
+			if (this.scrollToSourceTimeoutId !== null) {
+				clearTimeout(this.scrollToSourceTimeoutId);
+			}
+			this.scrollToSourceTimeoutId = window.setTimeout(() => {
+				this.scrollToSourceTimeoutId = null;
+				if (!this.isUserEditing) {
+					this.highlightCardInEditor(card);
+				}
+				this.applyBlurEffect(!this.answerRevealed);
 			}, 300);
 		} else {
-			this.highlightCardInEditor(card);
-			this.applyBlurEffect(!this.answerRevealed); // 根据状态应用模糊
+			if (!this.isUserEditing) {
+				this.highlightCardInEditor(card);
+			}
+			this.applyBlurEffect(!this.answerRevealed);
 		}
 	}
 
@@ -773,6 +805,10 @@ export class ReviewView extends ItemView {
 	}
 
 	async onClose(): Promise<void> {
+		if (this.scrollToSourceTimeoutId !== null) {
+			clearTimeout(this.scrollToSourceTimeoutId);
+			this.scrollToSourceTimeoutId = null;
+		}
 		this.clearBlurEffect();
 		this.contentEl.empty();
 	}
