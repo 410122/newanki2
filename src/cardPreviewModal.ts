@@ -1,6 +1,6 @@
 //卡片预览模态框
 import { App, Component, MarkdownRenderer, Modal, Notice, TFile } from "obsidian";
-import { CardData, Rating, State } from "./models";
+import { CardData, PluginData, Rating, State } from "./models";
 import { CardStore } from "./store";
 import { timeService } from "./timeService";
 
@@ -89,6 +89,14 @@ export class CardPreviewModal extends Modal {
 				new Notice(`已重置 ${count} 张卡片的复习进度`);
 				this.render();
 			});
+		}
+
+		if (this.previewScope === "global") {
+			const exportBtn = toolbar.createEl("button", { text: "导出" });
+			exportBtn.addEventListener("click", () => this.handleExport());
+
+			const importBtn = toolbar.createEl("button", { text: "导入" });
+			importBtn.addEventListener("click", () => this.handleImport());
 		}
 
 		const addBtn = toolbar.createEl("button", {
@@ -578,5 +586,83 @@ export class CardPreviewModal extends Modal {
 
 	private generateId(): string {
 		return timeService.nowTimestamp().toString(36) + Math.random().toString(36).substring(2, 9);
+	}
+
+	private handleExport(): void {
+		const data = this.store.exportAllData();
+		const json = JSON.stringify(data, null, 2);
+		const blob = new Blob([json], { type: "application/json" });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = "newanki-cards-export.json";
+		a.click();
+		URL.revokeObjectURL(url);
+		new Notice("导出成功");
+	}
+
+	private handleImport(): void {
+		const input = document.createElement("input");
+		input.type = "file";
+		input.accept = ".json";
+		input.addEventListener("change", async () => {
+			const file = input.files?.[0];
+			if (!file) return;
+
+			try {
+				const text = await file.text();
+				const parsed = JSON.parse(text);
+
+				const validation = this.store.validateCardsJson(parsed);
+				if (!validation.valid) {
+					new Notice(`导入失败：${validation.error}`);
+					return;
+				}
+
+				this.showImportModeModal(parsed);
+			} catch {
+				new Notice("导入失败：无法解析 JSON 文件");
+			}
+		});
+		input.click();
+	}
+
+	private showImportModeModal(data: unknown): void {
+		const modal = new Modal(this.app);
+		modal.titleEl.setText("导入模式");
+		modal.contentEl.createEl("p", {
+			text: "JSON 格式验证通过，请选择导入方式：",
+		});
+
+		const buttons = modal.contentEl.createDiv({ cls: "newanki-form-actions" });
+
+		const appendBtn = buttons.createEl("button", {
+			text: "追加卡片导入",
+			cls: "mod-cta",
+		});
+		appendBtn.addEventListener("click", async () => {
+			modal.close();
+			await this.store.importCards(data as PluginData, "append");
+			this.notifyDataChanged();
+			this.render();
+		});
+
+		const overwriteBtn = buttons.createEl("button", {
+			text: "覆盖卡片导入",
+			cls: "mod-warning",
+		});
+		overwriteBtn.addEventListener("click", () => {
+			modal.close();
+			if (!confirm("确认覆盖所有卡片吗？此操作不可撤销。")) return;
+			this.store.importCards(data as PluginData, "overwrite").then(() => {
+				this.notifyDataChanged();
+				this.render();
+			});
+		});
+
+		const cancelBtn = buttons.createEl("button", { text: "取消" });
+		cancelBtn.addEventListener("click", () => modal.close());
+
+		modal.open();
 	}
 }

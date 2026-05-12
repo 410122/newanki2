@@ -1,5 +1,5 @@
 //数据存储相关
-import { Plugin } from "obsidian";
+import { Notice, Plugin } from "obsidian";
 import { CardData, PluginData, PluginSettings, ReviewLogData, DEFAULT_PLUGIN_DATA, State } from "./models";
 import { timeService } from "./timeService";
 
@@ -321,5 +321,100 @@ export class CardStore {
 		}
 
 		return { new: newCount, learning: learningCount, review: reviewCount };
+	}
+
+	// 导出全部数据
+	exportAllData(): PluginData {
+		return JSON.parse(JSON.stringify(this.data));
+	}
+
+	// 验证导入的 JSON 是否符合卡片格式
+	validateCardsJson(data: unknown): { valid: boolean; error?: string } {
+		if (!data || typeof data !== "object") {
+			return { valid: false, error: "JSON 必须是一个对象" };
+		}
+
+		const obj = data as Record<string, unknown>;
+
+		if (!obj.cards || typeof obj.cards !== "object") {
+			return { valid: false, error: "缺少 cards 字段或格式不正确" };
+		}
+
+		const cards = obj.cards as Record<string, unknown>;
+		let totalCards = 0;
+
+		for (const [filePath, cardArray] of Object.entries(cards)) {
+			if (typeof filePath !== "string") {
+				return { valid: false, error: `cards 的 key 必须是字符串（文件路径）` };
+			}
+			if (!Array.isArray(cardArray)) {
+				return { valid: false, error: `文件 "${filePath}" 对应的值必须是数组` };
+			}
+
+			for (let i = 0; i < cardArray.length; i++) {
+				const card = cardArray[i] as Record<string, unknown>;
+				totalCards++;
+
+				if (typeof card.cardId !== "string") {
+					return { valid: false, error: `文件 "${filePath}" 第 ${i + 1} 张卡片缺少 cardId` };
+				}
+				if (typeof card.question !== "string") {
+					return { valid: false, error: `卡片 "${card.cardId}" 缺少 question` };
+				}
+				if (typeof card.answer !== "string") {
+					return { valid: false, error: `卡片 "${card.cardId}" 缺少 answer` };
+				}
+				if (typeof card.sourceFile !== "string") {
+					return { valid: false, error: `卡片 "${card.cardId}" 缺少 sourceFile` };
+				}
+				if (typeof card.state !== "number" || card.state < 0 || card.state > 3) {
+					return { valid: false, error: `卡片 "${card.cardId}" 的 state 无效` };
+				}
+				if (typeof card.due !== "string") {
+					return { valid: false, error: `卡片 "${card.cardId}" 缺少 due` };
+				}
+				if (typeof card.createdAt !== "string") {
+					return { valid: false, error: `卡片 "${card.cardId}" 缺少 createdAt` };
+				}
+			}
+		}
+
+		if (totalCards === 0) {
+			return { valid: false, error: "JSON 中没有卡片数据" };
+		}
+
+		return { valid: true };
+	}
+
+	// 导入卡片数据
+	async importCards(
+		imported: PluginData,
+		mode: "append" | "overwrite"
+	): Promise<number> {
+		if (mode === "overwrite") {
+			this.data.cards = JSON.parse(JSON.stringify(imported.cards));
+			this.data.reviewLogs = JSON.parse(JSON.stringify(imported.reviewLogs ?? {}));
+		} else {
+			// 追加模式：合并 cards
+			for (const [filePath, cards] of Object.entries(imported.cards)) {
+				if (!this.data.cards[filePath]) {
+					this.data.cards[filePath] = [];
+				}
+				this.data.cards[filePath].push(...cards);
+			}
+
+			// 合并 reviewLogs
+			for (const [cardId, logs] of Object.entries(imported.reviewLogs ?? {})) {
+				if (!this.data.reviewLogs[cardId]) {
+					this.data.reviewLogs[cardId] = [];
+				}
+				this.data.reviewLogs[cardId].push(...logs);
+			}
+		}
+
+		await this.save();
+		const totalCards = this.getAllCards().length;
+		new Notice(`导入成功，共 ${totalCards} 张卡片`);
+		return totalCards;
 	}
 }

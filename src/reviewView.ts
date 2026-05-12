@@ -631,7 +631,13 @@ export class ReviewView extends ItemView {
 
 		const card = this.session.cards[this.session.currentIndex]!;
 		const file = this.app.vault.getAbstractFileByPath(card.sourceFile);
-		if (!(file instanceof TFile)) return;
+		if (!(file instanceof TFile)) {
+			const view = this.sourceLeaf.view;
+			if (view instanceof MarkdownView) {
+				view.contentEl.empty();
+			}
+			return;
+		}
 
 		const currentView = this.sourceLeaf.view;
 		const currentFile = currentView instanceof MarkdownView ? currentView.file : null;
