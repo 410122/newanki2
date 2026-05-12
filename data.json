@@ -1,0 +1,655 @@
+{
+  "settings": {
+    "learningSteps": [
+      1,
+      10
+    ],
+    "graduatingInterval": 1,
+    "easyInterval": 4,
+    "relearningSteps": [
+      10
+    ],
+    "minimumInterval": 1,
+    "maximumInterval": 36500,
+    "startingEase": 2.5,
+    "easyBonus": 1.3,
+    "intervalModifier": 1,
+    "hardInterval": 1.2,
+    "newInterval": 0,
+    "showSourceFileDuringReview": true
+  },
+  "cards": {
+    "未命名 3.md": [
+      {
+        "cardId": "mo7cjkgthjeo6te",
+        "question": "000",
+        "answer": "5555",
+        "sourceFile": "未命名 3.md",
+        "lineStart": 5,
+        "lineEnd": 5,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-04-27T00:08:00.000Z",
+        "currentInterval": 5,
+        "createdAt": "2026-04-20T15:25:17.790Z",
+        "inLearningQueue": false
+      }
+    ],
+    "日期测试22/文件1.md": [
+      {
+        "cardId": "mo80caxn74xl093",
+        "question": "1111",
+        "answer": "11111--26号到期",
+        "sourceFile": "日期测试22/文件1.md",
+        "lineStart": 0,
+        "lineEnd": 0,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-06-11T07:47:07.411Z",
+        "currentInterval": 30,
+        "createdAt": "2026-04-21T02:31:29.628Z",
+        "inLearningQueue": false
+      },
+      {
+        "cardId": "mo80craa9ukk54h",
+        "question": "222",
+        "answer": "2222--26号到期",
+        "sourceFile": "日期测试22/文件1.md",
+        "lineStart": 1,
+        "lineEnd": 1,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-06-10T07:47:32.146Z",
+        "currentInterval": 29,
+        "createdAt": "2026-04-21T02:31:50.819Z",
+        "inLearningQueue": false
+      },
+      {
+        "cardId": "modkz6dcevg025w",
+        "question": "333",
+        "answer": "3333--24号到期 ",
+        "sourceFile": "日期测试22/文件1.md",
+        "lineStart": 2,
+        "lineEnd": 2,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-06-13T07:47:34.339Z",
+        "currentInterval": 32,
+        "createdAt": "2026-04-25T00:08:00.000Z",
+        "inLearningQueue": false
+      },
+      {
+        "cardId": "mo9w4y9yxetuclk",
+        "question": "pp",
+        "answer": "5555--29号到期 +7",
+        "sourceFile": "日期测试22/文件1.md",
+        "lineStart": 4,
+        "lineEnd": 4,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-05-13T07:47:50.611Z",
+        "currentInterval": 1,
+        "createdAt": "2026-04-22T10:09:20.518Z",
+        "inLearningQueue": false
+      }
+    ],
+    "日期测试22/文2.md": [
+      {
+        "cardId": "mo7v7rpc0fibjda",
+        "question": "111",
+        "answer": "111",
+        "sourceFile": "日期测试22/文2.md",
+        "lineStart": 0,
+        "lineEnd": 0,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-06-15T07:47:39.192Z",
+        "currentInterval": 34,
+        "createdAt": "2026-04-21T00:08:00.000Z",
+        "inLearningQueue": false
+      },
+      {
+        "cardId": "mo7v7rpc7zmolp9",
+        "question": "222",
+        "answer": "222",
+        "sourceFile": "日期测试22/文2.md",
+        "lineStart": 1,
+        "lineEnd": 1,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-06-09T07:47:46.167Z",
+        "currentInterval": 28,
+        "createdAt": "2026-04-21T00:08:00.000Z",
+        "inLearningQueue": false
+      },
+      {
+        "cardId": "mo7v7rpc641qv40",
+        "question": "333",
+        "answer": "333",
+        "sourceFile": "日期测试22/文2.md",
+        "lineStart": 2,
+        "lineEnd": 2,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-06-11T07:47:48.048Z",
+        "currentInterval": 30,
+        "createdAt": "2026-04-21T00:08:00.000Z",
+        "inLearningQueue": false
+      }
+    ],
+    "未命名.md": [
+      {
+        "cardId": "mp19w66wzp7mm79",
+        "question": "000",
+        "answer": "借助cc+obcli，让他告诉我哪些文件不经常被看",
+        "sourceFile": "未命名.md",
+        "lineStart": 3,
+        "lineEnd": 3,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-05-12T15:51:44.674Z",
+        "currentInterval": 1,
+        "createdAt": "2026-05-11T14:04:12.248Z",
+        "inLearningQueue": false
+      },
+      {
+        "cardId": "mp1dpvz8msi9nr6",
+        "question": "![[Pasted image 20260418214231.png]]",
+        "answer": "![[Pasted image 20260418214231.png]]",
+        "sourceFile": "未命名.md",
+        "lineStart": 0,
+        "lineEnd": 0,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-05-12T15:51:48.318Z",
+        "currentInterval": 1,
+        "createdAt": "2026-05-11T15:51:17.540Z",
+        "cardType": "image-occlusion",
+        "imagePath": "Pasted image 20260418214231.png",
+        "occlusion": {
+          "id": "mp1dpfgtfgpj2qa",
+          "x": 18.475750577367204,
+          "y": 27.25664369171796,
+          "width": 13.16397228637413,
+          "height": 11.79462607349526
+        },
+        "inLearningQueue": false
+      },
+      {
+        "cardId": "mp1dpvz8wnvd8yc",
+        "question": "![[Pasted image 20260418214231.png]]",
+        "answer": "![[Pasted image 20260418214231.png]]",
+        "sourceFile": "未命名.md",
+        "lineStart": 0,
+        "lineEnd": 0,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-05-12T15:52:01.278Z",
+        "currentInterval": 1,
+        "createdAt": "2026-05-11T15:51:17.540Z",
+        "cardType": "image-occlusion",
+        "imagePath": "Pasted image 20260418214231.png",
+        "occlusion": {
+          "id": "mp1dpjdtu423uql",
+          "x": 25.750577367205548,
+          "y": 42.010983745530936,
+          "width": 16.512702078521936,
+          "height": 10.379270944675834
+        },
+        "inLearningQueue": false
+      },
+      {
+        "cardId": "mp1dpvz8yp6sx7c",
+        "question": "![[Pasted image 20260418214231.png]]",
+        "answer": "![[Pasted image 20260418214231.png]]",
+        "sourceFile": "未命名.md",
+        "lineStart": 0,
+        "lineEnd": 0,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-05-12T15:52:08.621Z",
+        "currentInterval": 1,
+        "createdAt": "2026-05-11T15:51:17.540Z",
+        "cardType": "image-occlusion",
+        "imagePath": "Pasted image 20260418214231.png",
+        "occlusion": {
+          "id": "mp1dplex3sb3dde",
+          "x": 23.149236192714454,
+          "y": 86.76018303203061,
+          "width": 30.90481786133959,
+          "height": 9.841722301402744
+        },
+        "inLearningQueue": false
+      },
+      {
+        "cardId": "mp1dpvz86xljvs3",
+        "question": "![[Pasted image 20260418214231.png]]",
+        "answer": "![[Pasted image 20260418214231.png]]",
+        "sourceFile": "未命名.md",
+        "lineStart": 0,
+        "lineEnd": 0,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-05-12T15:52:11.168Z",
+        "currentInterval": 1,
+        "createdAt": "2026-05-11T15:51:17.540Z",
+        "cardType": "image-occlusion",
+        "imagePath": "Pasted image 20260418214231.png",
+        "occlusion": {
+          "id": "mp1dpmjhbi6yref",
+          "x": 18.213866039952993,
+          "y": 58.13142299902483,
+          "width": 25.381903642773207,
+          "height": 8.401470257295037
+        },
+        "inLearningQueue": false
+      },
+      {
+        "cardId": "mp1dpvz8977vuvh",
+        "question": "![[Pasted image 20260418214231.png]]",
+        "answer": "![[Pasted image 20260418214231.png]]",
+        "sourceFile": "未命名.md",
+        "lineStart": 0,
+        "lineEnd": 0,
+        "state": 2,
+        "step": null,
+        "ease": 2.5,
+        "due": "2026-05-12T15:52:13.245Z",
+        "currentInterval": 1,
+        "createdAt": "2026-05-11T15:51:17.540Z",
+        "cardType": "image-occlusion",
+        "imagePath": "Pasted image 20260418214231.png",
+        "occlusion": {
+          "id": "mp1dpnrwg57alsx",
+          "x": 34.78260869565217,
+          "y": 71.57377541069687,
+          "width": 46.06345475910693,
+          "height": 11.041932338159183
+        },
+        "inLearningQueue": false
+      }
+    ],
+    "日期测试22/日期测试.md": [
+      {
+        "cardId": "mp2cbkcynipatcr",
+        "question": "000",
+        "answer": "bug:处于学习中的卡片也意外毕业了\n如何debug",
+        "sourceFile": "日期测试22/日期测试.md",
+        "lineStart": 9,
+        "lineEnd": 10,
+        "state": 0,
+        "step": null,
+        "ease": null,
+        "due": "2026-05-12T07:59:55.858Z",
+        "currentInterval": null,
+        "createdAt": "2026-05-12T07:59:55.858Z",
+        "inLearningQueue": true
+      }
+    ]
+  },
+  "reviewLogs": {
+    "mo7v7rpc0fibjda": [
+      {
+        "cardId": "mo7v7rpc0fibjda",
+        "rating": 3,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-21T00:18:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc0fibjda",
+        "rating": 1,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-21T00:09:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc0fibjda",
+        "rating": 2,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-21T00:13:30.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc0fibjda",
+        "rating": 3,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-21T00:18:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc0fibjda",
+        "rating": 2,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-21T00:18:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc0fibjda",
+        "rating": 4,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-25T00:08:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc0fibjda",
+        "rating": 4,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-25T00:08:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc0fibjda",
+        "rating": 3,
+        "reviewDatetime": "2026-05-12T07:47:39.192Z",
+        "prevState": 2,
+        "prevEase": 2.5,
+        "prevInterval": 4,
+        "newDue": "2026-06-15T07:47:39.192Z"
+      }
+    ],
+    "mo7v7rpc7zmolp9": [
+      {
+        "cardId": "mo7v7rpc7zmolp9",
+        "rating": 4,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-25T00:08:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc7zmolp9",
+        "rating": 4,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-25T00:08:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc7zmolp9",
+        "rating": 3,
+        "reviewDatetime": "2026-05-12T07:47:46.167Z",
+        "prevState": 2,
+        "prevEase": 2.5,
+        "prevInterval": 4,
+        "newDue": "2026-06-09T07:47:46.167Z"
+      }
+    ],
+    "mo7v7rpc641qv40": [
+      {
+        "cardId": "mo7v7rpc641qv40",
+        "rating": 2,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-21T00:09:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc641qv40",
+        "rating": 3,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-21T00:18:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc641qv40",
+        "rating": 4,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-25T00:08:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc641qv40",
+        "rating": 4,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-25T00:08:00.000Z"
+      },
+      {
+        "cardId": "mo7v7rpc641qv40",
+        "rating": 3,
+        "reviewDatetime": "2026-05-12T07:47:48.048Z",
+        "prevState": 2,
+        "prevEase": 2.5,
+        "prevInterval": 4,
+        "newDue": "2026-06-11T07:47:48.048Z"
+      }
+    ],
+    "mo80caxn74xl093": [
+      {
+        "cardId": "mo80caxn74xl093",
+        "rating": 4,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-25T00:08:00.000Z"
+      },
+      {
+        "cardId": "mo80caxn74xl093",
+        "rating": 3,
+        "reviewDatetime": "2026-05-12T07:47:07.411Z",
+        "prevState": 2,
+        "prevEase": 2.5,
+        "prevInterval": 4,
+        "newDue": "2026-06-11T07:47:07.411Z"
+      }
+    ],
+    "mo80craa9ukk54h": [
+      {
+        "cardId": "mo80craa9ukk54h",
+        "rating": 4,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-25T00:08:00.000Z"
+      },
+      {
+        "cardId": "mo80craa9ukk54h",
+        "rating": 3,
+        "reviewDatetime": "2026-05-12T07:47:32.146Z",
+        "prevState": 2,
+        "prevEase": 2.5,
+        "prevInterval": 4,
+        "newDue": "2026-06-10T07:47:32.146Z"
+      }
+    ],
+    "modkz6dcevg025w": [
+      {
+        "cardId": "modkz6dcevg025w",
+        "rating": 4,
+        "reviewDatetime": "2026-04-21T00:08:00.000Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-04-25T00:08:00.000Z"
+      },
+      {
+        "cardId": "modkz6dcevg025w",
+        "rating": 3,
+        "reviewDatetime": "2026-05-12T07:47:34.339Z",
+        "prevState": 2,
+        "prevEase": 2.5,
+        "prevInterval": 4,
+        "newDue": "2026-06-13T07:47:34.339Z"
+      }
+    ],
+    "mp19w66wzp7mm79": [
+      {
+        "cardId": "mp19w66wzp7mm79",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:51:26.111Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-11T16:01:26.111Z"
+      },
+      {
+        "cardId": "mp19w66wzp7mm79",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:51:44.674Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-12T15:51:44.674Z"
+      }
+    ],
+    "mp1dpvz8msi9nr6": [
+      {
+        "cardId": "mp1dpvz8msi9nr6",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:51:31.157Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-11T16:01:31.157Z"
+      },
+      {
+        "cardId": "mp1dpvz8msi9nr6",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:51:48.318Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-12T15:51:48.318Z"
+      }
+    ],
+    "mp1dpvz8wnvd8yc": [
+      {
+        "cardId": "mp1dpvz8wnvd8yc",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:51:34.718Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-11T16:01:34.718Z"
+      },
+      {
+        "cardId": "mp1dpvz8wnvd8yc",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:52:01.278Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-12T15:52:01.278Z"
+      }
+    ],
+    "mp1dpvz8yp6sx7c": [
+      {
+        "cardId": "mp1dpvz8yp6sx7c",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:51:38.225Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-11T16:01:38.225Z"
+      },
+      {
+        "cardId": "mp1dpvz8yp6sx7c",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:52:08.621Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-12T15:52:08.621Z"
+      }
+    ],
+    "mp1dpvz86xljvs3": [
+      {
+        "cardId": "mp1dpvz86xljvs3",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:51:40.599Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-11T16:01:40.599Z"
+      },
+      {
+        "cardId": "mp1dpvz86xljvs3",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:52:11.168Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-12T15:52:11.168Z"
+      }
+    ],
+    "mp1dpvz8977vuvh": [
+      {
+        "cardId": "mp1dpvz8977vuvh",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:51:41.981Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-11T16:01:41.981Z"
+      },
+      {
+        "cardId": "mp1dpvz8977vuvh",
+        "rating": 3,
+        "reviewDatetime": "2026-05-11T15:52:13.245Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-12T15:52:13.245Z"
+      }
+    ],
+    "mo9w4y9yxetuclk": [
+      {
+        "cardId": "mo9w4y9yxetuclk",
+        "rating": 3,
+        "reviewDatetime": "2026-05-12T07:47:36.447Z",
+        "prevState": 0,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-12T07:57:36.447Z"
+      },
+      {
+        "cardId": "mo9w4y9yxetuclk",
+        "rating": 3,
+        "reviewDatetime": "2026-05-12T07:47:50.611Z",
+        "prevState": 1,
+        "prevEase": null,
+        "prevInterval": null,
+        "newDue": "2026-05-13T07:47:50.611Z"
+      }
+    ]
+  }
+}
