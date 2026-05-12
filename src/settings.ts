@@ -200,5 +200,19 @@ export class NewAnkiSettingTab extends PluginSettingTab {
 						}
 					})
 			);
+
+		containerEl.createEl("h3", { text: "复习选项" });
+
+		new Setting(containerEl)
+			.setName("复习时打开右侧源文件")
+			.setDesc("启用后，复习时会在右侧显示当前卡片所在的源文件")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.store.settings.showSourceFileDuringReview)
+					.onChange(async (value) => {
+						this.plugin.store.settings.showSourceFileDuringReview = value;
+						await this.plugin.store.save();
+					})
+			);
+		}
 	}
-}

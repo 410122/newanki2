@@ -469,9 +469,11 @@ export default class NewAnkiPlugin extends Plugin {
 
 		const { reviewLeaf, sourceLeaf } = await this.createSplitLayout();
 
-		const file = this.app.vault.getAbstractFileByPath(filePath);
-		if (file instanceof TFile) {
-			await sourceLeaf.openFile(file);
+		if (sourceLeaf) {
+			const file = this.app.vault.getAbstractFileByPath(filePath);
+			if (file instanceof TFile) {
+				await sourceLeaf.openFile(file);
+			}
 		}
 
 		const reviewView = reviewLeaf.view as ReviewView;
@@ -500,10 +502,12 @@ export default class NewAnkiPlugin extends Plugin {
 
 		const { reviewLeaf, sourceLeaf } = await this.createSplitLayout();
 
-		const firstCard = dueCards[0]!;
-		const file = this.app.vault.getAbstractFileByPath(firstCard.sourceFile);
-		if (file instanceof TFile) {
-			await sourceLeaf.openFile(file);
+		if (sourceLeaf) {
+			const firstCard = dueCards[0]!;
+			const file = this.app.vault.getAbstractFileByPath(firstCard.sourceFile);
+			if (file instanceof TFile) {
+				await sourceLeaf.openFile(file);
+			}
 		}
 
 		const reviewView = reviewLeaf.view as ReviewView;
@@ -532,10 +536,12 @@ export default class NewAnkiPlugin extends Plugin {
 
 		const { reviewLeaf, sourceLeaf } = await this.createSplitLayout();
 
-		const firstCard = dueCards[0]!;
-		const file = this.app.vault.getAbstractFileByPath(firstCard.sourceFile);
-		if (file instanceof TFile) {
-			await sourceLeaf.openFile(file);
+		if (sourceLeaf) {
+			const firstCard = dueCards[0]!;
+			const file = this.app.vault.getAbstractFileByPath(firstCard.sourceFile);
+			if (file instanceof TFile) {
+				await sourceLeaf.openFile(file);
+			}
 		}
 
 		const reviewView = reviewLeaf.view as ReviewView;
@@ -557,14 +563,16 @@ export default class NewAnkiPlugin extends Plugin {
 
 	private async createSplitLayout(): Promise<{
 		reviewLeaf: WorkspaceLeaf;
-		sourceLeaf: WorkspaceLeaf;
+		sourceLeaf: WorkspaceLeaf | null;
 	}> {
 		this.app.workspace.detachLeavesOfType(REVIEW_VIEW_TYPE);
 
 		const activeLeaf = this.app.workspace.getLeaf(true);
 		await activeLeaf.setViewState({ type: REVIEW_VIEW_TYPE, active: true });
 
-		const sourceLeaf = this.app.workspace.createLeafBySplit(activeLeaf, "vertical");
+		const sourceLeaf = this.store.settings.showSourceFileDuringReview
+			? this.app.workspace.createLeafBySplit(activeLeaf, "vertical")
+			: null;
 
 		this.app.workspace.setActiveLeaf(activeLeaf, { focus: true });
 

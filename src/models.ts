@@ -61,6 +61,7 @@ export interface PluginSettings {
 	intervalModifier: number;
 	hardInterval: number;
 	newInterval: number;
+	showSourceFileDuringReview: boolean;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -75,6 +76,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	intervalModifier: 1.0,
 	hardInterval: 1.2,
 	newInterval: 0.0,
+	showSourceFileDuringReview: true,
 };
 
 export interface PluginData {

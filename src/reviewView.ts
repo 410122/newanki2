@@ -97,7 +97,7 @@ export class ReviewView extends ItemView {
 		return "layers";
 	}
 
-	setSourceLeaf(leaf: WorkspaceLeaf): void {
+	setSourceLeaf(leaf: WorkspaceLeaf | null): void {
 		this.sourceLeaf = leaf;
 	}
 
