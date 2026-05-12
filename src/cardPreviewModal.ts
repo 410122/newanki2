@@ -1,5 +1,5 @@
 //卡片预览模态框
-import { App, Component, MarkdownRenderer, Modal, Notice } from "obsidian";
+import { App, Component, MarkdownRenderer, Modal, Notice, TFile } from "obsidian";
 import { CardData, Rating, State } from "./models";
 import { CardStore } from "./store";
 import { timeService } from "./timeService";
@@ -285,10 +285,17 @@ export class CardPreviewModal extends Modal {
 		const item = container.createDiv({ cls: "newanki-card-item" });
 
 		const meta = item.createDiv({ cls: "newanki-card-item-meta" });
-		meta.createEl("div", {
+		const sourceDiv = meta.createDiv({
 			cls: "newanki-card-source",
 			text: card.sourceFile,
 		});
+		if (card.cardType === "image-occlusion") {
+			const tag = meta.createEl("span", {
+				cls: "newanki-card-type-tag",
+				text: "图片遮挡",
+			});
+			sourceDiv.appendChild(tag);
+		}
 		meta.createEl("div", {
 			cls: "newanki-card-due",
 			text: `到期: ${this.formatDateTime(card.due)}`,
@@ -307,6 +314,42 @@ export class CardPreviewModal extends Modal {
 		});
 		answerInput.value = card.answer;
 		this.autoResizeTextarea(answerInput);
+
+		if (card.cardType === "image-occlusion" && card.imagePath && card.occlusion) {
+			const occPreview = item.createDiv({ cls: "newanki-occlusion-mini-preview" });
+			const imageFile = this.app.vault.getAbstractFileByPath(card.imagePath);
+			if (imageFile instanceof TFile) {
+				const resourcePath = this.app.vault.getResourcePath(imageFile);
+				const imgWrapper = occPreview.createDiv({
+					cls: "newanki-occlusion-mini-img-wrap",
+				});
+				const img = imgWrapper.createEl("img", {
+					cls: "newanki-occlusion-mini-img",
+				});
+				img.src = resourcePath;
+				img.onload = () => {
+					const dw = img.clientWidth;
+					const dh = img.clientHeight;
+					const canvas = imgWrapper.createEl("canvas", {
+						cls: "newanki-occlusion-mini-canvas",
+					});
+					canvas.width = dw;
+					canvas.height = dh;
+					const ctx = canvas.getContext("2d");
+					if (ctx) {
+						const x = (card.occlusion!.x / 100) * dw;
+						const y = (card.occlusion!.y / 100) * dh;
+						const w = (card.occlusion!.width / 100) * dw;
+						const h = (card.occlusion!.height / 100) * dh;
+						ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+						ctx.fillRect(x, y, w, h);
+						ctx.strokeStyle = "rgba(255, 0, 0, 0.9)";
+						ctx.lineWidth = 1;
+						ctx.strokeRect(x, y, w, h);
+					}
+				};
+			}
+		}
 
 		let previewVisible = false;
 		const previewWrap = item.createDiv({

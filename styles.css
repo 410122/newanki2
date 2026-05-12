@@ -622,3 +622,175 @@
 .newanki-log-table tr:hover {
 	background: var(--background-secondary-alt);
 }
+
+/* ── Image Occlusion Modal ── */
+.newanki-occlusion-modal .modal {
+	width: min(900px, 90vw);
+	min-width: 400px;
+	max-height: 90vh;
+	overflow-y: auto;
+}
+
+.newanki-occlusion-header {
+	margin-bottom: 12px;
+}
+
+.newanki-occlusion-header h3 {
+	margin: 0 0 4px;
+}
+
+.newanki-occlusion-hint {
+	font-size: 13px;
+	color: var(--text-muted);
+	margin: 0;
+}
+
+.newanki-occlusion-image-container {
+	position: relative;
+	display: inline-block;
+	max-width: 100%;
+	margin-bottom: 12px;
+}
+
+.newanki-occlusion-image {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+	border: 1px solid var(--background-modifier-border);
+}
+
+.newanki-occlusion-canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	cursor: crosshair;
+	border-radius: 8px;
+}
+
+.newanki-occlusion-list {
+	margin-bottom: 16px;
+	padding: 10px;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	max-height: 160px;
+	overflow-y: auto;
+}
+
+.newanki-occlusion-list-title {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+	margin-bottom: 6px;
+}
+
+.newanki-occlusion-list-empty {
+	font-size: 13px;
+	color: var(--text-faint);
+	text-align: center;
+	padding: 12px 0;
+}
+
+.newanki-occlusion-list-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 6px 8px;
+	border-radius: 6px;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	margin-bottom: 4px;
+	font-size: 13px;
+}
+
+.newanki-occlusion-list-item:last-child {
+	margin-bottom: 0;
+}
+
+.newanki-occlusion-list-item button {
+	padding: 2px 8px;
+	font-size: 12px;
+}
+
+.newanki-occlusion-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.newanki-occlusion-error {
+	color: var(--text-error);
+	padding: 20px;
+	text-align: center;
+}
+
+/* ── Review: Image Occlusion ── */
+.newanki-occlusion-img-container {
+	position: relative;
+	display: inline-block;
+	max-width: 100%;
+}
+
+.newanki-occlusion-img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+}
+
+.newanki-occlusion-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border-radius: 8px;
+	pointer-events: none;
+}
+
+/* ── Card Preview: Image Occlusion Mini Preview ── */
+.newanki-occlusion-mini-preview {
+	margin-top: 6px;
+}
+
+.newanki-occlusion-mini-img-wrap {
+	position: relative;
+	display: inline-block;
+	max-width: 100%;
+	max-height: 120px;
+	overflow: hidden;
+	border-radius: 6px;
+	border: 1px solid var(--background-modifier-border);
+}
+
+.newanki-occlusion-mini-img {
+	display: block;
+	max-width: 100%;
+	max-height: 120px;
+	height: auto;
+}
+
+.newanki-occlusion-mini-canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+/* ── Card Type Tag ── */
+.newanki-card-type-tag {
+	display: inline-block;
+	margin-left: 8px;
+	padding: 1px 8px;
+	font-size: 11px;
+	font-weight: 600;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-radius: 4px;
+	vertical-align: middle;
+}

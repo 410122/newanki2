@@ -1,9 +1,11 @@
-import { Editor, MarkdownView, Notice, Plugin, TFile, TFolder, TAbstractFile, WorkspaceLeaf } from "obsidian";
+import { Editor, MarkdownView, Menu, Notice, Plugin, TFile, TFolder, TAbstractFile, WorkspaceLeaf } from "obsidian";
 import { CardStore } from "./store";
 import { CreateCardModal } from "./createCardModal";
 import { CardPreviewModal } from "./cardPreviewModal";
 import { ReviewView, REVIEW_VIEW_TYPE } from "./reviewView";
+import { ImageOcclusionModal } from "./imageOcclusionModal";
 import { NewAnkiSettingTab } from "./settings";
+import { CardData } from "./models";
 
 export default class NewAnkiPlugin extends Plugin {
 	store: CardStore;
@@ -21,6 +23,7 @@ export default class NewAnkiPlugin extends Plugin {
 
 		this.registerEditorContextMenu();
 		this.registerFileMenu();
+		this.registerImageContextMenu();
 		this.registerCommands();
 		this.registerFileEvents();
 		this.registerReviewAction();
@@ -139,6 +142,112 @@ export default class NewAnkiPlugin extends Plugin {
 				}
 			})
 		);
+	}
+
+	private registerImageContextMenu(): void {
+		// 阅读模式/实时预览：DOM右键菜单
+		this.registerDomEvent(document, "contextmenu", (evt: MouseEvent) => {
+			const target = evt.target as HTMLElement;
+			if (!(target instanceof HTMLImageElement)) return;
+
+			const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (!view?.file) return;
+
+			const imagePath = this.resolveImagePath(target, view.file.path);
+			if (!imagePath) return;
+
+			evt.preventDefault();
+			evt.stopPropagation();
+
+			const menu = new Menu();
+			menu.addItem((item) => {
+				item.setTitle("制作遮挡图片卡片")
+					.setIcon("image-file")
+					.onClick(() => {
+						this.openImageOcclusionEditor(imagePath, view.file!.path);
+					});
+			});
+			menu.showAtMouseEvent(evt);
+		});
+
+		// 源码模式：editor-menu 检测图片语法
+		this.registerEvent(
+			this.app.workspace.on("editor-menu", (menu, editor, view) => {
+				const selection = editor.getSelection();
+				if (selection) return;
+
+				const cursor = editor.getCursor("from");
+				const line = editor.getLine(cursor.line);
+				const imagePath = this.parseImageFromLine(line, view.file?.path ?? "");
+				if (!imagePath) return;
+
+				menu.addItem((item) => {
+					item.setTitle("制作遮挡图片卡片")
+						.setIcon("image-file")
+						.onClick(() => {
+							const file = view.file;
+							if (!file) return;
+							this.openImageOcclusionEditor(imagePath, file.path);
+						});
+				});
+			})
+		);
+	}
+
+	private resolveImagePath(img: HTMLImageElement, sourcePath: string): string | null {
+		const alt = img.getAttribute("alt")?.trim();
+		if (alt) {
+			const resolved = this.app.metadataCache.getFirstLinkpathDest(alt, sourcePath);
+			if (resolved) return resolved.path;
+		}
+
+		const src = img.getAttribute("src") ?? img.currentSrc;
+		if (src) {
+			try {
+				const url = new URL(src);
+				let path = decodeURIComponent(url.pathname);
+				if (path.startsWith("/")) path = path.slice(1);
+				const file = this.app.vault.getAbstractFileByPath(path);
+				if (file instanceof TFile) return file.path;
+			} catch {
+				// 忽略解析错误
+			}
+		}
+
+		return null;
+	}
+
+	private parseImageFromLine(line: string, sourcePath: string): string | null {
+		const wikiMatch = line.match(/!\[\[([^\]]+\.(?:png|jpg|jpeg|gif|svg|webp|bmp))\]\]/i);
+		if (wikiMatch) {
+			const linkpath = wikiMatch[1]!.split("|")[0]!;
+			const resolved = this.app.metadataCache.getFirstLinkpathDest(linkpath, sourcePath);
+			return resolved ? resolved.path : null;
+		}
+
+		const mdMatch = line.match(/!\[.*?\]\(([^)]+\.(?:png|jpg|jpeg|gif|svg|webp|bmp))\)/i);
+		if (mdMatch) {
+			const linkpath = mdMatch[1]!;
+			const resolved = this.app.metadataCache.getFirstLinkpathDest(linkpath, sourcePath);
+			return resolved ? resolved.path : null;
+		}
+
+		return null;
+	}
+
+	private openImageOcclusionEditor(imagePath: string, sourcePath: string): void {
+		new ImageOcclusionModal(
+			this.app,
+			imagePath,
+			sourcePath,
+			async (cards: CardData[]) => {
+				for (const card of cards) {
+					await this.store.addCard(card);
+				}
+				new Notice(`已创建 ${cards.length} 张遮挡卡片`);
+				this.handleCardsChanged();
+			}
+		).open();
 	}
 
 	private openGlobalCardPreview(): void {

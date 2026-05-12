@@ -1,6 +1,6 @@
 //复习视图组件
 import { ItemView, WorkspaceLeaf, MarkdownView, TFile, MarkdownRenderer, Modal, App, Setting } from "obsidian";
-import { CardData, Rating, ReviewLogData, State } from "./models";
+import { CardData, Rating, ReviewLogData, State, OcclusionRect } from "./models";
 import { CardStore } from "./store";
 import { reviewCard, getNextIntervals } from "./sm2";
 import { timeService } from "./timeService";
@@ -185,6 +185,23 @@ export class ReviewView extends ItemView {
 	private renderCard(container: HTMLElement, card: CardData): void {
 		const cardEl = container.createDiv({ cls: "newanki-card" });
 
+		if (card.cardType === "image-occlusion" && card.imagePath) {
+			this.renderImageOcclusionCard(cardEl, card);
+		} else {
+			this.renderNormalCard(cardEl, card);
+		}
+
+		const actions = cardEl.createDiv({ cls: "newanki-card-actions" });
+		const deleteBtn = actions.createEl("button", {
+			text: "删除当前卡片",
+			cls: "newanki-delete-card-btn",
+		});
+		deleteBtn.addEventListener("click", async () => {
+			await this.handleDeleteCurrentCard(card);
+		});
+	}
+
+	private renderNormalCard(cardEl: HTMLElement, card: CardData): void {
 		const questionSection = cardEl.createDiv({ cls: "newanki-question-section" });
 		questionSection.createEl("div", { text: "问题", cls: "newanki-section-label" });
 		this.renderEditableMarkdownSection(
@@ -227,15 +244,68 @@ export class ReviewView extends ItemView {
 				cls: "newanki-source-path",
 			});
 		}
+	}
 
-		const actions = cardEl.createDiv({ cls: "newanki-card-actions" });
-		const deleteBtn = actions.createEl("button", {
-			text: "删除当前卡片",
-			cls: "newanki-delete-card-btn",
+	private renderImageOcclusionCard(cardEl: HTMLElement, card: CardData): void {
+		const imagePath = card.imagePath!;
+		const occlusion = card.occlusion!;
+		const imageFile = this.app.vault.getAbstractFileByPath(imagePath);
+
+		if (!(imageFile instanceof TFile)) {
+			cardEl.createEl("div", {
+				cls: "newanki-occlusion-error",
+				text: `找不到图片: ${imagePath}`,
+			});
+			return;
+		}
+
+		const resourcePath = this.app.vault.getResourcePath(imageFile);
+
+		const questionSection = cardEl.createDiv({ cls: "newanki-question-section" });
+		questionSection.createEl("div", { text: "问题", cls: "newanki-section-label" });
+
+		const imgContainer = questionSection.createDiv({
+			cls: "newanki-occlusion-img-container",
 		});
-		deleteBtn.addEventListener("click", async () => {
-			await this.handleDeleteCurrentCard(card);
+		const img = imgContainer.createEl("img", {
+			cls: "newanki-occlusion-img",
 		});
+		img.src = resourcePath;
+
+		img.onload = () => {
+			const displayW = img.clientWidth;
+			const displayH = img.clientHeight;
+
+			const canvas = imgContainer.createEl("canvas", {
+				cls: "newanki-occlusion-overlay",
+			});
+			canvas.width = displayW;
+			canvas.height = displayH;
+
+			const ctx = canvas.getContext("2d");
+			if (!ctx || !occlusion) return;
+
+			if (!this.answerRevealed) {
+				const x = (occlusion.x / 100) * displayW;
+				const y = (occlusion.y / 100) * displayH;
+				const w = (occlusion.width / 100) * displayW;
+				const h = (occlusion.height / 100) * displayH;
+
+				ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+				ctx.fillRect(x, y, w, h);
+				ctx.strokeStyle = "rgba(255, 0, 0, 0.9)";
+				ctx.lineWidth = 2;
+				ctx.strokeRect(x, y, w, h);
+			}
+		};
+
+		if (this.session?.isGlobal) {
+			const sourceInfo = cardEl.createDiv({ cls: "newanki-source-info" });
+			sourceInfo.createEl("span", {
+				text: `来源: ${card.sourceFile}`,
+				cls: "newanki-source-path",
+			});
+		}
 	}
 
 	private autoResizeTextarea(textarea: HTMLTextAreaElement): void {

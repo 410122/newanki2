@@ -12,6 +12,14 @@ export enum Rating {
 	Easy = 4,
 }
 
+export interface OcclusionRect {
+	id: string;
+	x: number;      // 左上角 X 坐标，百分比 0-100
+	y: number;      // 左上角 Y 坐标，百分比 0-100
+	width: number;  // 宽度，百分比 0-100
+	height: number; // 高度，百分比 0-100
+}
+
 export interface CardData {
 	cardId: string;
 	question: string;
@@ -25,7 +33,10 @@ export interface CardData {
 	due: string;
 	currentInterval: number | null;
 	createdAt: string;
-	inLearningQueue?: boolean;  // 标记卡片是否正在学习队列中
+	inLearningQueue?: boolean;
+	cardType?: 'normal' | 'image-occlusion';
+	imagePath?: string;
+	occlusion?: OcclusionRect;
 }
 
 export interface ReviewLogData {
